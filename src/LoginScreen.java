@@ -100,9 +100,13 @@ public class LoginScreen {
 		btnForgotPassword.setBounds(244, 213, 146, 26);
 		frame.getContentPane().add(btnForgotPassword);
 		btnForgotPassword.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
+			public void actionPerformed(ActionEvent e) {
 				while(true) {
 					String input = JOptionPane.showInputDialog(null, "Please enter your Email");
+					/*Close if cancel is pressed*/
+					if(input==null){
+						break;
+					}
 					if(input.contains("@")){
 						/*
 						 * input is user Email, check Email in the file
@@ -111,6 +115,7 @@ public class LoginScreen {
 						break;
 					} 
 						JOptionPane.showMessageDialog(null, "Invalid Email");
+						
 				}//end loop				
 			}
 		});

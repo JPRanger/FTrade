@@ -27,7 +27,8 @@ public class MainScreen {
 	private JFrame frame;
 	private final JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 	private JTextField txtSearch;
-	private JButton btnSearch;
+	private JButton btnSearch, btnLogout;
+	private JPanel logoutPanel;
 	private String[] names = {"Coca-Cola","Apple","Google","Microsoft","Sony",
 			"Florida Gulf Coast University","Dell","Hewlett-Packard","Toshiba",
 			"Amazon","EBay","UPS","FedEx","Toyota","GMC","Tesla","Starbucks"};
@@ -68,6 +69,19 @@ public class MainScreen {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().add(tabbedPane, BorderLayout.CENTER);
 		frame.setLocationRelativeTo( null );
+		
+//		btnLogout = new JButton("Logout");
+//		btnLogout.addActionListener(new ActionListener(){
+//
+//			public void actionPerformed(ActionEvent arg0) {
+//				new LoginScreen();
+//				frame.dispose();
+//			}
+//			
+//		});
+//		logoutPanel = new JPanel();
+//		logoutPanel.add(btnLogout, BorderLayout.EAST);
+//		frame.getContentPane().add(logoutPanel, BorderLayout.SOUTH);
 		
 		JPanel panel = new JPanel();
 		panel.setBackground(new Color(255, 255, 255));

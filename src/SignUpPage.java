@@ -1,7 +1,13 @@
-import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.StandardOpenOption;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -20,33 +26,36 @@ public class SignUpPage {
 	/**
 	 * Launch the application.
 	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					SignUpPage window = new SignUpPage();
-					window.frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
+//	public static void main(String[] args) {
+//		EventQueue.invokeLater(new Runnable() {
+//			public void run() {
+//				try {
+//					SignUpPage window = new SignUpPage();
+//					window.frame.setVisible(true);
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		});
+//	}
 
 	/**
 	 * Create the application.
 	 */
 	public SignUpPage() {
-		initialize();
+			initialize();
 		frame.setVisible(true);
 	}
 
 	/**
 	 * Initialize the contents of the frame.
+	 * @throws IOException 
 	 */
 	private void initialize() {
+			
+		
 		frame = new JFrame();
-		frame.setBounds(100, 100, 450, 300);
+		frame.setBounds(100, 100, 450, 320);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		frame.setLocationRelativeTo( null );
@@ -93,7 +102,7 @@ public class SignUpPage {
 		frame.getContentPane().add(confirmPassword);
 		
 		JButton btnCreatePassword = new JButton("Create account");
-		btnCreatePassword.setBounds(146, 233, 131, 26);
+		btnCreatePassword.setBounds(240, 233, 131, 26);
 		frame.getContentPane().add(btnCreatePassword);
 		btnCreatePassword.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -108,6 +117,23 @@ public class SignUpPage {
 								/*
 								 * store user info to a file in here
 								 */
+							String newAccount = new String(String.format("%s %s %s\n", userNameTextField.getText(),
+									passwordField.getPassword().toString(), emailTextField.getText()));
+							File accountsFile = new File("accounts/accounts.dat");
+
+							try (PrintWriter accountWriter = new PrintWriter(
+									new BufferedWriter(new FileWriter(accountsFile, true)));) {
+								if (!accountsFile.exists()) {
+									accountsFile.createNewFile();
+								}
+
+								accountWriter.write(newAccount);
+
+							} catch (IOException e1) {
+								System.err.println("newAccount format failed");
+								e1.printStackTrace();
+							}
+
 								new LoginScreen();
 								frame.dispose();
 						}else {
@@ -120,6 +146,18 @@ public class SignUpPage {
 					JOptionPane.showMessageDialog(null, "Please fill up all required information");
 				}
 			}
+		});
+		
+		JButton cancelButton = new JButton("Cancel");
+		cancelButton.setBounds(80, 233, 131, 26);
+		frame.getContentPane().add(cancelButton);
+		cancelButton.addActionListener(new ActionListener(){
+
+			public void actionPerformed(ActionEvent e) {
+				new LoginScreen();
+				frame.dispose();
+			}
+			
 		});
 		
 		JLabel lblEmail = new JLabel("Email:");
