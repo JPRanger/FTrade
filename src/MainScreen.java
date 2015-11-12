@@ -21,6 +21,8 @@ import javax.swing.UIManager;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.AbstractListModel;
+import javax.swing.Timer;
+import java.util.Random;
 
 public class MainScreen {
 
@@ -76,11 +78,40 @@ public class MainScreen {
 		panel.setLayout(null);
 		
 		JTextArea txtNewsFeed = new JTextArea();
+		txtNewsFeed.setEditable(false);
 		txtNewsFeed.setFont(new Font("Monospaced", Font.PLAIN, 14));
 		txtNewsFeed.setBounds(10, 54, 409, 157);
 		txtNewsFeed.setLineWrap(true);
-		txtNewsFeed.setText("\u2022 American Airlines tops profit estimates \r\n\u2022 Microsoft to lay off 1,000 more workers: reports\r\n\u2022 Tesla to make cars in China within two years \r\n\u2022 Goldman: Euro could end 2015 at $1.05 ");
 		panel.add(txtNewsFeed);
+		txtNewsFeed.setText("\u2022 American Airlines tops profit estimates \r\n\u2022 Microsoft to lay off 1,000 more workers: reports\r\n\u2022 Tesla to make cars in China within two years \r\n\u2022 Goldman: Euro could end 2015 at $1.05 ");
+		String news1 ="d";
+		Timer timer = new Timer(4000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+            	 Random randomGenerator = new Random();
+            	int textChange = randomGenerator.nextInt(3);
+            	switch(textChange){
+            	case 1:
+            		txtNewsFeed.setText("\u2022 Exxon Mobil (XOM) Stock Falls Along With Oil Prices \r\n\u2022Report claims iPhone 6s isn’t selling as fast as Apple thought it would \r\n\u2022 Following sales slump Macy's may slash prices for Christmas  \r\n\u2022 Oracle's Amazon-killer might really be 6 months away ");
+
+            		txtNewsFeed.repaint();
+            		break;
+            	case 2:
+            		txtNewsFeed.setText("\u2022 Cyber Monday Set to be Bigger Driver of Online Holiday Sales \r\n\u2022 Will Higher Store Traffic Boost Walmart’s 3Q16 Same-Store Sales? \r\n\u2022 Takata fined millions over airbags \r\n\u2022 Oil down 2%; worries of another rise in US crude stockpiles ");
+            		txtNewsFeed.repaint();
+            		break;
+            	default:
+            		txtNewsFeed.setText("\u2022 Dell-EMC merger faces several lawsuits from shareholders \r\n\u2022FedEx, UPS Gear Up For The Most Important Quarter Of The Year \r\n\u2022 Toshiba Shares Fall After Loss, Lawsuits  \r\n\u2022 Hewlett Packard Enterprise, HP Inc. Announce Dividends ");
+            		txtNewsFeed.repaint();
+            }
+        }});
+        timer.setRepeats(true);
+        timer.setCoalesce(true);
+        timer.start();
+    
+
+		
+		
 		
 		JLabel lblNews = new JLabel("News");
 		lblNews.setFont(new Font("Thames", Font.BOLD | Font.ITALIC, 25));
