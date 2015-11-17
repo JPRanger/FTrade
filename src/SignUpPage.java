@@ -22,6 +22,7 @@ public class SignUpPage {
 
 	private JFrame frame;
 	private JTextField emailTextField;
+	private String currentUser = LoginScreen.loginInfo[0];
 
 	/**
 	 * Launch the application.
@@ -117,8 +118,14 @@ public class SignUpPage {
 								/*
 								 * store user info to a file in here
 								 */
+							char[] newPassword = passwordField.getPassword();
+							for(int i=0; i<newPassword.length; i++){
+								newPassword[i]+=i;
+							}
+							String storePassword = new String(newPassword);
+							System.out.println(newPassword);
 							String newAccount = new String(String.format("%s %s %s\n", userNameTextField.getText(),
-									passwordField.getPassword().toString(), emailTextField.getText()));
+									storePassword, emailTextField.getText()));
 							File accountsFile = new File("accounts/accounts.dat");
 
 							try (PrintWriter accountWriter = new PrintWriter(
