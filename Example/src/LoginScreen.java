@@ -1,42 +1,33 @@
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
-import java.awt.Image;
 
-import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JTextArea;
-
 import java.awt.BorderLayout;
-
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
-
 import java.awt.Font;
-
 import javax.swing.JTextField;
 import javax.swing.JButton;
-
 import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.util.Scanner;
+import java.util.StringTokenizer;
+import java.awt.event.ActionEvent;
 import javax.swing.JPasswordField;
 import javax.swing.ImageIcon;
-import javax.swing.JTabbedPane;
-import javax.swing.JPanel;
 
 public class LoginScreen {
 
 	private JFrame frame;
-	private JTextField textField;
+	private JTextField usernameField;
 	private JPasswordField passwordField;
-	private final JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-	private JTextField adminUserName;
-	private JPasswordField adminPassword;
-	
+	private Scanner loginCheck;
+	protected static String[] loginInfo = new String[3];
 
 	/**
 	 * Launch the application.
@@ -64,148 +55,122 @@ public class LoginScreen {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		frame = new JFrame();
+		frame = new JFrame("FTrade");
 		frame.setResizable(false);
 		frame.setBounds(100, 100, 450, 300);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.getContentPane().setLayout(null);
 		frame.setLocationRelativeTo( null );
-		frame.getContentPane().add(tabbedPane, BorderLayout.CENTER);
 		
-
+		JLabel lblEnterUserName = new JLabel("F-Trade");
+		lblEnterUserName.setBounds(0, 0, 450, 66);
+		lblEnterUserName.setHorizontalAlignment(SwingConstants.CENTER);
+		lblEnterUserName.setFont(new Font("Superclarendon", Font.PLAIN, 36));
+		frame.getContentPane().add(lblEnterUserName);
 		
-		tabbedPane.setBounds(0, 0, 444, 20);
-		frame.getContentPane().add(tabbedPane);
+		usernameField = new JTextField();
+		usernameField.setBounds(171, 78, 131, 30);
+		frame.getContentPane().add(usernameField);
+		usernameField.setColumns(10);
 		
+		JLabel lblUsername = new JLabel("Username:");
+		lblUsername.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		lblUsername.setBounds(48, 76, 113, 26);
+		frame.getContentPane().add(lblUsername);
 		
-		JPanel panel = new JPanel();
-		tabbedPane.addTab("Regular User", null, panel, null);
-			panel.setLayout(null);
+		JLabel lblPassword = new JLabel("Password:");
+		lblPassword.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		lblPassword.setBounds(48, 129, 113, 26);
+		frame.getContentPane().add(lblPassword);
 		
-			
-			JLabel lblEnterUserName = new JLabel("F-Trade");
-			panel.add(lblEnterUserName);
-			lblEnterUserName.setBounds(138, 11, 189, 40);
-			lblEnterUserName.setHorizontalAlignment(SwingConstants.CENTER);
-			lblEnterUserName.setFont(new Font("Superclarendon", Font.PLAIN, 36));
-			
-			textField = new JTextField();
-			panel.add(textField);
-			textField.setBounds(171, 78, 131, 30);
-			textField.setColumns(10);
-			
-			JLabel lblUsername = new JLabel("Username:");
-			panel.add(lblUsername);
-			lblUsername.setBounds(48, 76, 113, 26);
-			lblUsername.setFont(new Font("Tahoma", Font.PLAIN, 20));
-			
-			JLabel lblPassword = new JLabel("Password:");
-			panel.add(lblPassword);
-			lblPassword.setBounds(48, 129, 113, 26);
-			lblPassword.setFont(new Font("Tahoma", Font.PLAIN, 20));
-			
-			JButton btnLogin = new JButton("Login");
-			panel.add(btnLogin);
-			btnLogin.setBounds(199, 172, 78, 26);
-			
-			JButton btnCreatePassword = new JButton("Create account");
-			panel.add(btnCreatePassword);
-			btnCreatePassword.setBounds(61, 213, 131, 26);
-			
-			//Forgot Password
-			JButton btnForgotPassword = new JButton("Forgot Password?");
-			panel.add(btnForgotPassword);
-			btnForgotPassword.setBounds(244, 213, 146, 26);
-			
-			passwordField = new JPasswordField();
-			panel.add(passwordField);
-			passwordField.setBounds(171, 131, 131, 30);
-			
-			JLabel lblRegularUser = new JLabel("Regular User");
-			panel.add(lblRegularUser);
-			lblRegularUser.setBounds(199, 61, 68, 15);
-			lblRegularUser.setFont(new Font("Tahoma", Font.PLAIN, 12));
-			btnForgotPassword.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent arg0) {
-					while(true) {
-						String input = JOptionPane.showInputDialog(null, "Please enter your Email");
-						if(input.contains("@")){
-							/*
-							 * input is user Email, check Email in the file
-							 */
-							JOptionPane.showMessageDialog(null, "Password has been sent to your Email");
-							break;
-						} 
-							JOptionPane.showMessageDialog(null, "Invalid Email");
-					}//end loop				
+		JButton btnLogin = new JButton("Login");
+		btnLogin.setBounds(199, 172, 78, 26);
+		frame.getContentPane().add(btnLogin);
+		btnLogin.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){ 
+				/*Check password*/
+				String fieldPassword = new String(passwordField.getPassword()).trim();
+				try{
+					loginCheck = new Scanner(new File("accounts/accounts.dat"));
 				}
-			});
-			btnCreatePassword.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					new SignUpPage();
-					frame.dispose();
+				catch(FileNotFoundException fnfe){
+					System.err.println("Accounts file not found during login check");
+					System.exit(1);
 				}
-			});
-			btnLogin.addActionListener(new ActionListener(){
-				public void actionPerformed(ActionEvent e){
-					new MainScreen();
-					frame.dispose();
+				while(loginCheck.hasNext()){
+					String checkUsername = loginCheck.next();
+					if(checkUsername.equals(usernameField.getText())){
+						loginInfo[0] = checkUsername;
+						char[] passwordConvert = loginCheck.next().toCharArray();
+						for(int i=0; i<passwordConvert.length; i++){
+							passwordConvert[i]-=i;
+						}
+						loginInfo[1] = new String(passwordConvert).trim();
+						loginInfo[2] = loginCheck.next();
+						if(fieldPassword.equals(loginInfo[1])){
+							new MainScreen();
+							frame.dispose();
+						}
+						else{
+							usernameField.setText("");
+							passwordField.setText("");
+							JOptionPane.showMessageDialog(null, "Username or password incorrect.", "Incorrect Login", 
+									JOptionPane.ERROR_MESSAGE);
+						}
+					}
+					else{
+						usernameField.setText("");
+						passwordField.setText("");
+						JOptionPane.showMessageDialog(null, "Username not found", "No Such User", 
+								JOptionPane.ERROR_MESSAGE);
+						break;
+					}
 				}
-			});
+			}
+		});
 		
-		JPanel panel_1 = new JPanel();
-		tabbedPane.addTab("Admin", null, panel_1, null);
-		panel_1.setLayout(null);
-		
-		JLabel label_2 = new JLabel("F-Trade");
-		label_2.setBounds(138, 11, 189, 40);
-		label_2.setHorizontalAlignment(SwingConstants.CENTER);
-		label_2.setFont(new Font("Dialog", Font.PLAIN, 36));
-		panel_1.add(label_2);
-		
-		JLabel label = new JLabel("Username:");
-		label.setBounds(48, 76, 113, 26);
-		label.setFont(new Font("Tahoma", Font.PLAIN, 20));
-		panel_1.add(label);
-		
-		adminUserName = new JTextField();
-		adminUserName.setBounds(171, 78, 131, 30);
-		adminUserName.setColumns(10);
-		panel_1.add(adminUserName);
-		
-		JLabel label_1 = new JLabel("Password:");
-		label_1.setBounds(48, 129, 113, 26);
-		label_1.setFont(new Font("Tahoma", Font.PLAIN, 20));
-		panel_1.add(label_1);
-		
-		adminPassword = new JPasswordField();
-		adminPassword.setBounds(171, 131, 131, 30);
-		panel_1.add(adminPassword);
-		
-		JButton button = new JButton("Login");
-		button.addActionListener(new ActionListener() {
+		JButton btnCreatePassword = new JButton("Create account");
+		btnCreatePassword.setBounds(61, 213, 131, 26);
+		frame.getContentPane().add(btnCreatePassword);
+		btnCreatePassword.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				new AdminMainScreen();
+				new SignUpPage();
 				frame.dispose();
 			}
 		});
-		button.setBounds(199, 172, 78, 26);
-		panel_1.add(button);
 		
-		JLabel lblAdmin = new JLabel("Admin");
-		lblAdmin.setFont(new Font("Tahoma", Font.PLAIN, 12));
-		lblAdmin.setBounds(199, 61, 68, 15);
-		panel_1.add(lblAdmin);
+		//Forgot Password
+		JButton btnForgotPassword = new JButton("Forgot Password?");
+		btnForgotPassword.setBounds(244, 213, 146, 26);
+		frame.getContentPane().add(btnForgotPassword);
+		btnForgotPassword.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				while(true) {
+					String input = JOptionPane.showInputDialog(null, "Please enter your Email");
+					/*Close if cancel is pressed*/
+					if(input==null){
+						break;
+					}
+					if(input.contains("@")){
+						/*
+						 * input is user Email, check Email in the file
+						 */
+						JOptionPane.showMessageDialog(null, "Password has been sent to your Email");
+						break;
+					} 
+						JOptionPane.showMessageDialog(null, "Invalid Email");
+						
+				}//end loop				
+			}
+		});
 		
+		passwordField = new JPasswordField();
+		passwordField.setBounds(171, 131, 131, 30);
+		frame.getContentPane().add(passwordField);
 		
-		JLabel picLabel = new JLabel("");
-		picLabel.setIcon(new ImageIcon("image/bkgd.jpg"));
-		picLabel.setBounds(0, 0, 450, 278);
-		panel.add(picLabel);
-		
-		JLabel picLabel2 = new JLabel("");
-		picLabel2.setIcon(new ImageIcon("image/bkgd.jpg"));
-		picLabel2.setBounds(0, 0, 450, 278);
-		panel_1.add(picLabel2);
-		
+		JLabel label = new JLabel("");
+		label.setIcon(new ImageIcon("image/bkgd.jpg"));
+		label.setBounds(0, 0, 450, 278);
+		frame.getContentPane().add(label);
 	}
 }
