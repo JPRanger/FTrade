@@ -15,6 +15,8 @@ import javax.swing.JComboBox;
 import javax.swing.JEditorPane;
 import javax.swing.DefaultComboBoxModel;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JButton;
 import javax.swing.UIManager;
@@ -29,7 +31,8 @@ public class MainScreen {
 	private JFrame frame;
 	private final JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 	private JTextField txtSearch;
-	private JButton btnSearch;
+	private JButton btnSearch, btnLogout;
+	private JPanel logoutPanel;
 	private String[] names = {"Coca-Cola","Apple","Google","Microsoft","Sony",
 			"Florida Gulf Coast University","Dell","Hewlett-Packard","Toshiba",
 			"Amazon","EBay","UPS","FedEx","Toyota","GMC","Tesla","Starbucks"};
@@ -71,13 +74,26 @@ public class MainScreen {
 		frame.getContentPane().add(tabbedPane, BorderLayout.CENTER);
 		frame.setLocationRelativeTo( null );
 		
+//		btnLogout = new JButton("Logout");
+//		btnLogout.addActionListener(new ActionListener(){
+//
+//			public void actionPerformed(ActionEvent arg0) {
+//				new LoginScreen();
+//				frame.dispose();
+//			}
+//			
+//		});
+//		logoutPanel = new JPanel();
+//		logoutPanel.add(btnLogout, BorderLayout.EAST);
+//		frame.getContentPane().add(logoutPanel, BorderLayout.SOUTH);
+		
 		JPanel panel = new JPanel();
 		panel.setBackground(new Color(255, 255, 255));
 		panel.setToolTipText("");
 		tabbedPane.addTab("News", null, panel, null);
 		panel.setLayout(null);
 		
-		JTextArea txtNewsFeed = new JTextArea();
+		final JTextArea txtNewsFeed = new JTextArea();
 		txtNewsFeed.setEditable(false);
 		txtNewsFeed.setFont(new Font("Monospaced", Font.PLAIN, 14));
 		txtNewsFeed.setBounds(10, 54, 409, 157);
@@ -92,12 +108,12 @@ public class MainScreen {
             	int textChange = randomGenerator.nextInt(3);
             	switch(textChange){
             	case 1:
-            		txtNewsFeed.setText("\u2022 Exxon Mobil (XOM) Stock Falls Along With Oil Prices \r\n\u2022Report claims iPhone 6s isn’t selling as fast as Apple thought it would \r\n\u2022 Following sales slump Macy's may slash prices for Christmas  \r\n\u2022 Oracle's Amazon-killer might really be 6 months away ");
+            		txtNewsFeed.setText("\u2022 Exxon Mobil (XOM) Stock Falls Along With Oil Prices \r\n\u2022Report claims iPhone 6s isnï¿½t selling as fast as Apple thought it would \r\n\u2022 Following sales slump Macy's may slash prices for Christmas  \r\n\u2022 Oracle's Amazon-killer might really be 6 months away ");
 
             		txtNewsFeed.repaint();
             		break;
             	case 2:
-            		txtNewsFeed.setText("\u2022 Cyber Monday Set to be Bigger Driver of Online Holiday Sales \r\n\u2022 Will Higher Store Traffic Boost Walmart’s 3Q16 Same-Store Sales? \r\n\u2022 Takata fined millions over airbags \r\n\u2022 Oil down 2%; worries of another rise in US crude stockpiles ");
+            		txtNewsFeed.setText("\u2022 Cyber Monday Set to be Bigger Driver of Online Holiday Sales \r\n\u2022 Will Higher Store Traffic Boost Walmartï¿½s 3Q16 Same-Store Sales? \r\n\u2022 Takata fined millions over airbags \r\n\u2022 Oil down 2%; worries of another rise in US crude stockpiles ");
             		txtNewsFeed.repaint();
             		break;
             	default:
@@ -187,6 +203,15 @@ public class MainScreen {
 					txtSearch.setBounds(335, 38, 84, 20);
 					panel_1.add(txtSearch);
 					txtSearch.setColumns(10);
+					txtSearch.addFocusListener(new FocusListener() {
+
+						public void focusGained(FocusEvent arg0) {
+							txtSearch.setText("");
+						}
+
+						public void focusLost(FocusEvent arg0) {/*Do nothing*/}
+						
+					});
 				
 					btnSearch = new JButton("Search");
 					btnSearch.setBounds(335, 65, 83, 18);
