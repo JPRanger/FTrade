@@ -1,9 +1,7 @@
-import java.awt.EventQueue;
-import java.awt.FlowLayout;
+package FTrade;
 
+import java.awt.EventQueue;
 import javax.swing.JFrame;
-import javax.swing.JTextArea;
-import java.awt.BorderLayout;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
@@ -11,12 +9,10 @@ import java.awt.Font;
 import javax.swing.JTextField;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.IOException;
 import java.util.Scanner;
-import java.util.StringTokenizer;
 import java.awt.event.ActionEvent;
 import javax.swing.JPasswordField;
 import javax.swing.ImageIcon;
@@ -28,6 +24,8 @@ public class LoginScreen {
 	private JPasswordField passwordField;
 	private Scanner loginCheck;
 	protected static String[] loginInfo = new String[3];
+	protected static File accountsFile = new File("accounts/accounts.dat");
+	protected static File ticketsFile = new File("tickets/tickets.dat");
 
 	/**
 	 * Launch the application.
@@ -55,6 +53,19 @@ public class LoginScreen {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
+		/*Create data storage files*/
+		try{
+			File ticketsDir = new File("tickets");
+			File accountsDir = new File("accounts");
+			ticketsDir.mkdirs();
+			accountsDir.mkdirs();
+			accountsFile.createNewFile();
+			ticketsFile.createNewFile();
+		}
+		catch(IOException ioe){
+			System.err.println("File initialization failed");
+		}
+		
 		frame = new JFrame("FTrade");
 		frame.setResizable(false);
 		frame.setBounds(100, 100, 450, 300);
@@ -100,6 +111,7 @@ public class LoginScreen {
 				while(loginCheck.hasNext()){
 					String checkUsername = loginCheck.next();
 					if(checkUsername.equals(usernameField.getText())){
+						System.out.println("Username check success");
 						loginInfo[0] = checkUsername;
 						char[] passwordConvert = loginCheck.next().toCharArray();
 						for(int i=0; i<passwordConvert.length; i++){
@@ -110,6 +122,7 @@ public class LoginScreen {
 						if(fieldPassword.equals(loginInfo[1])){
 							new MainScreen();
 							frame.dispose();
+							break;
 						}
 						else{
 							usernameField.setText("");
@@ -119,11 +132,14 @@ public class LoginScreen {
 						}
 					}
 					else{
+						if(loginCheck.hasNext()){
+							continue;
+						}
+						System.out.println("username check fail");
 						usernameField.setText("");
 						passwordField.setText("");
 						JOptionPane.showMessageDialog(null, "Username not found", "No Such User", 
 								JOptionPane.ERROR_MESSAGE);
-						break;
 					}
 				}
 			}
