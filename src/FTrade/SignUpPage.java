@@ -1,14 +1,14 @@
+package FTrade;
+
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.StandardOpenOption;
 import java.util.Scanner;
 
 import javax.swing.ImageIcon;
@@ -149,13 +149,10 @@ public class SignUpPage {
 							System.out.println(newPassword);
 							String newAccount = new String(String.format("%s %s %s\n", userNameTextField.getText(),
 									storePassword, emailTextField.getText()));
-							File accountsFile = new File("accounts/accounts.dat");
 
 							try (PrintWriter accountWriter = new PrintWriter(
-									new BufferedWriter(new FileWriter(accountsFile, true)));) {
-								if (!accountsFile.exists()) {
-									accountsFile.createNewFile();
-								}
+									new BufferedWriter(new FileWriter(LoginScreen.accountsFile, true)));) {
+								
 
 								accountWriter.write(newAccount);
 

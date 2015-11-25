@@ -1,14 +1,13 @@
-import java.awt.EventQueue;
+package FTrade;
 
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
 
 import java.awt.BorderLayout;
 
-import javax.swing.JToolBar;
 import javax.swing.SwingConstants;
 import javax.swing.JPanel;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JLabel;
 
@@ -16,19 +15,20 @@ import java.awt.Font;
 import java.awt.Color;
 
 import javax.swing.JComboBox;
-import javax.swing.JEditorPane;
 import javax.swing.DefaultComboBoxModel;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.UIManager;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
-import javax.swing.AbstractListModel;
 import javax.swing.Timer;
 
 import java.util.Random;
@@ -50,8 +50,8 @@ public class MainScreen {
 			"Amazon","EBay","UPS","FedEx","Toyota","GMC","Tesla","Starbucks"};
 	//Test cases: a,os
 	private JButton[] results = new JButton[names.length];
-	private JTextField textField;
-	private JTextField textField_1;
+	private JTextField titleField;
+	private JTextArea descField;
 	//string stores news for JLabels
 	private String headLines1 =  "\u2022 American Airlines tops profit estimates";
 	private String headLines2 =  "\u2022 Microsoft to lay off 1,000 more workers: reports";
@@ -323,7 +323,7 @@ public class MainScreen {
 		list.setBounds(174, 191, -115, -85);
 		panel_1.add(list);
 		
-		String [] ticketString = {"General Concern", "Payment Issue", "Account"}; 
+		final String [] ticketString = {"General Concern", "Payment Issue", "Account"}; 
 		
 		JPanel panel_3 = new JPanel();
 		
@@ -337,15 +337,16 @@ public class MainScreen {
 		tabbedPane.addTab("Tickets", null, panel_2, null);
 		panel_2.setLayout(null);
 		
-		textField = new JTextField();
-		textField.setBounds(126, 51, 126, 20);
-		panel_2.add(textField);
-		textField.setColumns(10);
+		titleField = new JTextField();
+		titleField.setBounds(126, 51, 126, 20);
+		panel_2.add(titleField);
+		titleField.setColumns(10);
 		
-		textField_1 = new JTextField();
-		textField_1.setBounds(84, 107, 210, 82);
-		panel_2.add(textField_1);
-		textField_1.setColumns(10);
+		descField = new JTextArea();
+		descField.setBounds(84, 107, 210, 82);
+		panel_2.add(descField);
+		descField.setColumns(10);
+		descField.setLineWrap(true);
 		
 		JLabel lblDescription = new JLabel("Description");
 		lblDescription.setHorizontalAlignment(SwingConstants.CENTER);
@@ -357,12 +358,27 @@ public class MainScreen {
 		lblNewLabel.setToolTipText("");
 		lblNewLabel.setBounds(163, 30, 46, 14);
 		panel_2.add(lblNewLabel);
-		JComboBox comboBox_1 = new JComboBox(ticketString);
-		comboBox_1.setBounds(281, 42, 118, 20);
-		panel_2.add(comboBox_1);
+		
+		final JComboBox ticketType = new JComboBox(ticketString);
+		ticketType.setBounds(281, 42, 118, 20);
+		panel_2.add(ticketType);
 		
 		JButton btnSubmit = new JButton("Submit");
 		btnSubmit.setBounds(330, 199, 89, 23);
 		panel_2.add(btnSubmit);
+		btnSubmit.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e){
+				try(FileWriter ticketWriter = new FileWriter(LoginScreen.ticketsFile,true)) {
+					final String LINEBREAK = System.lineSeparator();
+					
+					ticketWriter.write(ticketString[ticketType.getSelectedIndex()] + LINEBREAK);
+					ticketWriter.write(titleField.getText() + LINEBREAK);
+					ticketWriter.write(descField.getText() + LINEBREAK);
+					ticketWriter.write(LINEBREAK);
+				} catch (IOException e1) {
+					System.err.println("Failed to write to tickets file");
+				}
+			}
+		});
 	}
 }
