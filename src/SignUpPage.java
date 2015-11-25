@@ -3,11 +3,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.StandardOpenOption;
+import java.util.Scanner;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -107,6 +109,27 @@ public class SignUpPage {
 		frame.getContentPane().add(btnCreatePassword);
 		btnCreatePassword.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				
+				try{
+					Scanner usernameCheck = new Scanner(new File("accounts/accounts.dat"));
+					
+					while(usernameCheck.hasNext()){
+						if(userNameTextField.getText().equals(usernameCheck.next())){
+							JOptionPane.showMessageDialog(null, "Username already exists", 
+									"Invalid Username", JOptionPane.ERROR_MESSAGE);
+							userNameTextField.setText("");
+							passwordField.setText("");
+							confirmPassword.setText("");
+							emailTextField.setText("");
+							return;
+						}
+					}
+				}
+				catch(FileNotFoundException fnfe){
+					System.err.println("Accounts file not found during login check");
+					System.exit(1);
+				}
+				
 				
 				//checking input validation
 				if(userNameTextField.getText().length()>0 && passwordField.getText().length()>0 &&
