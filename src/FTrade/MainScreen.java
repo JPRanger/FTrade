@@ -105,6 +105,7 @@ public class MainScreen {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().add(tabbedPane, BorderLayout.CENTER);
 		frame.setLocationRelativeTo( null );
+		frame.setTitle("FTrade: " + LoginScreen.loginInfo[0]);
 		
 		JPanel panel = new JPanel();
 		panel.setBackground(new Color(255, 255, 255));
@@ -184,10 +185,10 @@ public class MainScreen {
 
 
 		
-		final JPanel panel_1 = new JPanel();
-		panel_1.setBackground(UIManager.getColor("Button.background"));
-		tabbedPane.addTab("Trade", null, panel_1, null);
-		panel_1.setLayout(null);
+		final JPanel tradePanel = new JPanel();
+		tradePanel.setBackground(UIManager.getColor("Button.background"));
+		tabbedPane.addTab("Trade", null, tradePanel, null);
+		tradePanel.setLayout(null);
 		
 		for(int i=0;i<results.length;i++){
 			results[i]=new JButton(names[i]);
@@ -237,12 +238,12 @@ public class MainScreen {
 				JComboBox cb = (JComboBox)e.getSource();
 				if(cb.getSelectedItem().equals("Name")){
 					try{	
-						panel_1.remove(txtSearch);
-						panel_1.remove(btnSearch);
+						tradePanel.remove(txtSearch);
+						tradePanel.remove(btnSearch);
 						for(JButton button : results)
-							panel_1.remove(button);
-						panel_1.revalidate();
-						panel_1.repaint();
+							tradePanel.remove(button);
+						tradePanel.revalidate();
+						tradePanel.repaint();
 					}
 					catch(NullPointerException npe){
 						//Suppress warnings
@@ -251,7 +252,7 @@ public class MainScreen {
 					txtSearch = new JTextField();
 					txtSearch.setText("Params");
 					txtSearch.setBounds(335, 38, 84, 20);
-					panel_1.add(txtSearch);
+					tradePanel.add(txtSearch);
 					txtSearch.setColumns(10);
 					txtSearch.addFocusListener(new FocusListener() {
 
@@ -265,11 +266,11 @@ public class MainScreen {
 				
 					btnSearch = new JButton("Search");
 					btnSearch.setBounds(335, 65, 83, 18);
-					panel_1.add(btnSearch);
+					tradePanel.add(btnSearch);
 					btnSearch.addActionListener(new ActionListener() {
 						public void actionPerformed(ActionEvent e1){
 							for(JButton button : results)
-								panel_1.remove(button);
+								tradePanel.remove(button);
 							String searchParam = txtSearch.getText();
 							int xPos=0, yPos=0;
 							//Iterate through String array
@@ -277,9 +278,9 @@ public class MainScreen {
 								if(names[i].contains(searchParam)){
 									results[i].setBounds(xPos,yPos,200,23);
 									yPos+=23;
-									panel_1.add(results[i]);
-									panel_1.revalidate();
-									panel_1.repaint();
+									tradePanel.add(results[i]);
+									tradePanel.revalidate();
+									tradePanel.repaint();
 								}
 							}
 						}
@@ -287,12 +288,12 @@ public class MainScreen {
 				}
 				else if(cb.getSelectedItem().equals("Volume")){
 					try{	
-						panel_1.remove(txtSearch);
-						panel_1.remove(btnSearch);
+						tradePanel.remove(txtSearch);
+						tradePanel.remove(btnSearch);
 						for(JButton button : results)
-							panel_1.remove(button);
-						panel_1.revalidate();
-						panel_1.repaint();
+							tradePanel.remove(button);
+						tradePanel.revalidate();
+						tradePanel.repaint();
 					}
 					catch(NullPointerException npe){
 						//Suppress warnings
@@ -301,12 +302,12 @@ public class MainScreen {
 				}
 				else if(cb.getSelectedItem().equals("Price")){
 					try{	
-						panel_1.remove(txtSearch);
-						panel_1.remove(btnSearch);
+						tradePanel.remove(txtSearch);
+						tradePanel.remove(btnSearch);
 						for(JButton button : results)
-							panel_1.remove(button);
-						panel_1.revalidate();
-						panel_1.repaint();
+							tradePanel.remove(button);
+						tradePanel.revalidate();
+						tradePanel.repaint();
 					}
 					catch(NullPointerException npe){
 						//Suppress warnings
@@ -317,11 +318,11 @@ public class MainScreen {
 		});
 		comboBox.setModel(new DefaultComboBoxModel(new String[] {"Select Filter", "Price", "Volume", "Name"}));
 		comboBox.setBounds(294, 11, 129, 20);
-		panel_1.add(comboBox);
+		tradePanel.add(comboBox);
 		
 		JList list = new JList();
 		list.setBounds(174, 191, -115, -85);
-		panel_1.add(list);
+		tradePanel.add(list);
 		
 		final String [] ticketString = {"General Concern", "Payment Issue", "Account"}; 
 		
@@ -331,7 +332,7 @@ public class MainScreen {
 		
 //		JButton btnNewButton = new JButton("New button");
 //		btnNewButton.setBounds(0, 0, 89, 23);
-//		panel_1.add(btnNewButton);
+//		tradePanel.add(btnNewButton);
 
 		JPanel panel_2 = new JPanel();
 		tabbedPane.addTab("Tickets", null, panel_2, null);
