@@ -111,7 +111,6 @@ public class LoginScreen {
 				while(loginCheck.hasNext()){
 					String checkUsername = loginCheck.next();
 					if(checkUsername.equals(usernameField.getText())){
-						System.out.println("Username check success");
 						loginInfo[0] = checkUsername;
 						char[] passwordConvert = loginCheck.next().toCharArray();
 						for(int i=0; i<passwordConvert.length; i++){
@@ -135,7 +134,6 @@ public class LoginScreen {
 						if(loginCheck.hasNext()){
 							continue;
 						}
-						System.out.println("username check fail");
 						usernameField.setText("");
 						passwordField.setText("");
 						JOptionPane.showMessageDialog(null, "Username not found", "No Such User", 
@@ -171,6 +169,10 @@ public class LoginScreen {
 						/*
 						 * input is user Email, check Email in the file
 						 */
+						while(loginCheck.hasNext()){
+							
+						}
+						
 						JOptionPane.showMessageDialog(null, "Password has been sent to your Email");
 						break;
 					} 

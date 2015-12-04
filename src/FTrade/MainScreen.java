@@ -325,14 +325,6 @@ public class MainScreen {
 		tradePanel.add(list);
 		
 		final String [] ticketString = {"General Concern", "Payment Issue", "Account"}; 
-		
-		JPanel panel_3 = new JPanel();
-		
-		tabbedPane.addTab("Graph", null, panel_3, null);
-		
-//		JButton btnNewButton = new JButton("New button");
-//		btnNewButton.setBounds(0, 0, 89, 23);
-//		tradePanel.add(btnNewButton);
 
 		JPanel panel_2 = new JPanel();
 		tabbedPane.addTab("Tickets", null, panel_2, null);
