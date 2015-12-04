@@ -1,39 +1,43 @@
-import java.awt.EventQueue;
+package FTrade;
 
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
 
 import java.awt.BorderLayout;
 
-import javax.swing.JToolBar;
 import javax.swing.SwingConstants;
 import javax.swing.JPanel;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JLabel;
 
 import java.awt.Font;
+import java.awt.GridLayout;
 import java.awt.Color;
+import java.awt.FlowLayout;
 
 import javax.swing.JComboBox;
-import javax.swing.JEditorPane;
 import javax.swing.DefaultComboBoxModel;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.UIManager;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
-import javax.swing.AbstractListModel;
 import javax.swing.Timer;
 
 import java.util.Random;
 
-import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.layout.ColumnSpec;
-import com.jgoodies.forms.layout.RowSpec;
+//import com.jgoodies.forms.layout.FormLayout;
+//import com.jgoodies.forms.layout.ColumnSpec;
+//import com.jgoodies.forms.layout.RowSpec;
 
 import javax.swing.ImageIcon;
 
@@ -48,19 +52,19 @@ public class MainScreen {
 			"Amazon","EBay","UPS","FedEx","Toyota","GMC","Tesla","Starbucks"};
 	//Test cases: a,os
 	private JButton[] results = new JButton[names.length];
-	private JTextField textField;
-	private JTextField textField_1;
+	private JTextField titleField;
+	private JTextArea descField;
 	//string stores news for JLabels
 	private String headLines1 =  "\u2022 American Airlines tops profit estimates";
 	private String headLines2 =  "\u2022 Microsoft to lay off 1,000 more workers: reports";
 	private String headLines3 =  "\u2022 Tesla to make cars in China within two years";
 	private String headLines4 =  "\u2022 Goldman: Euro could end 2015 at $1.05";
 	private String headLines5 =  "\u2022 Exxon Mobil (XOM) Stock Falls Along With Oil Prices";
-	private String headLines6 =	 "\u2022 Report claims iPhone 6s isn’t selling as fast as Apple thought it would";
+	private String headLines6 =	 "\u2022 Report claims iPhone 6s isnï¿½t selling as fast as Apple thought it would";
 	private String headLines7 =  "\u2022 Following sales slump Macy's may slash prices for Christmas";
 	private String headLines8 =  "\u2022 Oracle's Amazon-killer might really be 6 months away";
 	private String headLines9 =  "\u2022 Cyber Monday Set to be Bigger Driver of Online Holiday Sales \r\n";
-	private String headLines10 = "\u2022 Will Higher Store Traffic Boost Walmart’s 3Q16 Same-Store Sales?";
+	private String headLines10 = "\u2022 Will Higher Store Traffic Boost Walmartï¿½s 3Q16 Same-Store Sales?";
 	private String headLines11 = "\u2022 Takata fined millions over airbags";
 	private String headLines12 = "\u2022 Oil down 2%; worries of another rise in US crude stockpiles";
 	private String headLines13 = "\u2022 Dell-EMC merger faces several lawsuits from shareholders";
@@ -103,44 +107,48 @@ public class MainScreen {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().add(tabbedPane, BorderLayout.CENTER);
 		frame.setLocationRelativeTo( null );
+		frame.setTitle("FTrade: " + LoginScreen.loginInfo[0]);
 		
-		JPanel panel = new JPanel();
-		panel.setBackground(new Color(255, 255, 255));
-		panel.setToolTipText("");
-		tabbedPane.addTab("News", null, panel, null);
-		panel.setLayout(null);
+		JPanel newsPanel = new JPanel();
+		newsPanel.setBackground(new Color(255, 255, 255));
+		newsPanel.setToolTipText("");
+		tabbedPane.addTab("News", null, newsPanel, null);
+		newsPanel.setLayout(null);
 
-		
+		JPanel fundsPanel = new JPanel();
+		fundsPanel.setLayout(new FlowLayout(FlowLayout.TRAILING));
+		fundsPanel.add(new JLabel("Funds"));
+		frame.add(fundsPanel, BorderLayout.SOUTH);
 		
 		JLabel lblNews = new JLabel("News");
 		lblNews.setFont(new Font("Thames", Font.BOLD | Font.ITALIC, 25));
 		lblNews.setBounds(38, 11, 91, 32);
-		panel.add(lblNews);
+		newsPanel.add(lblNews);
 		
-		JLabel lblHeadLine1 = new JLabel();
+		final JLabel lblHeadLine1 = new JLabel();
 		lblHeadLine1.setText(headLines1);
 		lblHeadLine1.setBounds(23, 54, 381, 32);
-		panel.add(lblHeadLine1);
+		newsPanel.add(lblHeadLine1);
 		
-		JLabel lblHeadLine2 = new JLabel();
+		final JLabel lblHeadLine2 = new JLabel();
 		lblHeadLine2.setText(headLines2);
 		lblHeadLine2.setBounds(23, 91, 381, 32);
-		panel.add(lblHeadLine2);
+		newsPanel.add(lblHeadLine2);
 		
-		JLabel lblHeadLine3 = new JLabel();
+		final JLabel lblHeadLine3 = new JLabel();
 		lblHeadLine3.setText(headLines3);
 		lblHeadLine3.setBounds(23, 134, 381, 32);
-		panel.add(lblHeadLine3);
+		newsPanel.add(lblHeadLine3);
 		
-		JLabel lblHeadLine4 = new JLabel();
+		final JLabel lblHeadLine4 = new JLabel();
 		lblHeadLine4.setText(headLines4);
 		lblHeadLine4.setBounds(23, 177, 381, 32);
-		panel.add(lblHeadLine4);
+		newsPanel.add(lblHeadLine4);
 		
 		JLabel lblNewLabel_2 = new JLabel("");
 		lblNewLabel_2.setIcon(new ImageIcon("image/bkgd.jpg"));
 		lblNewLabel_2.setBounds(0, 0, 429, 233);
-		panel.add(lblNewLabel_2);
+		newsPanel.add(lblNewLabel_2);
 		Timer timer = new Timer(4000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -182,10 +190,10 @@ public class MainScreen {
 
 
 		
-		final JPanel panel_1 = new JPanel();
-		panel_1.setBackground(UIManager.getColor("Button.background"));
-		tabbedPane.addTab("Trade", null, panel_1, null);
-		panel_1.setLayout(null);
+		final JPanel tradePanel = new JPanel();
+		tradePanel.setBackground(UIManager.getColor("Button.background"));
+		tabbedPane.addTab("Trade", null, tradePanel, null);
+		tradePanel.setLayout(null);
 		
 		for(int i=0;i<results.length;i++){
 			results[i]=new JButton(names[i]);
@@ -235,12 +243,12 @@ public class MainScreen {
 				JComboBox cb = (JComboBox)e.getSource();
 				if(cb.getSelectedItem().equals("Name")){
 					try{	
-						panel_1.remove(txtSearch);
-						panel_1.remove(btnSearch);
+						tradePanel.remove(txtSearch);
+						tradePanel.remove(btnSearch);
 						for(JButton button : results)
-							panel_1.remove(button);
-						panel_1.revalidate();
-						panel_1.repaint();
+							tradePanel.remove(button);
+						tradePanel.revalidate();
+						tradePanel.repaint();
 					}
 					catch(NullPointerException npe){
 						//Suppress warnings
@@ -249,16 +257,25 @@ public class MainScreen {
 					txtSearch = new JTextField();
 					txtSearch.setText("Params");
 					txtSearch.setBounds(335, 38, 84, 20);
-					panel_1.add(txtSearch);
+					tradePanel.add(txtSearch);
 					txtSearch.setColumns(10);
+					txtSearch.addFocusListener(new FocusListener() {
+
+						public void focusGained(FocusEvent arg0) {
+							txtSearch.setText("");
+						}
+
+						public void focusLost(FocusEvent arg0) {/*Do nothing*/}
+						
+					});
 				
 					btnSearch = new JButton("Search");
 					btnSearch.setBounds(335, 65, 83, 18);
-					panel_1.add(btnSearch);
+					tradePanel.add(btnSearch);
 					btnSearch.addActionListener(new ActionListener() {
 						public void actionPerformed(ActionEvent e1){
 							for(JButton button : results)
-								panel_1.remove(button);
+								tradePanel.remove(button);
 							String searchParam = txtSearch.getText();
 							int xPos=0, yPos=0;
 							//Iterate through String array
@@ -266,9 +283,9 @@ public class MainScreen {
 								if(names[i].contains(searchParam)){
 									results[i].setBounds(xPos,yPos,200,23);
 									yPos+=23;
-									panel_1.add(results[i]);
-									panel_1.revalidate();
-									panel_1.repaint();
+									tradePanel.add(results[i]);
+									tradePanel.revalidate();
+									tradePanel.repaint();
 								}
 							}
 						}
@@ -276,12 +293,12 @@ public class MainScreen {
 				}
 				else if(cb.getSelectedItem().equals("Volume")){
 					try{	
-						panel_1.remove(txtSearch);
-						panel_1.remove(btnSearch);
+						tradePanel.remove(txtSearch);
+						tradePanel.remove(btnSearch);
 						for(JButton button : results)
-							panel_1.remove(button);
-						panel_1.revalidate();
-						panel_1.repaint();
+							tradePanel.remove(button);
+						tradePanel.revalidate();
+						tradePanel.repaint();
 					}
 					catch(NullPointerException npe){
 						//Suppress warnings
@@ -290,12 +307,12 @@ public class MainScreen {
 				}
 				else if(cb.getSelectedItem().equals("Price")){
 					try{	
-						panel_1.remove(txtSearch);
-						panel_1.remove(btnSearch);
+						tradePanel.remove(txtSearch);
+						tradePanel.remove(btnSearch);
 						for(JButton button : results)
-							panel_1.remove(button);
-						panel_1.revalidate();
-						panel_1.repaint();
+							tradePanel.remove(button);
+						tradePanel.revalidate();
+						tradePanel.repaint();
 					}
 					catch(NullPointerException npe){
 						//Suppress warnings
@@ -306,35 +323,28 @@ public class MainScreen {
 		});
 		comboBox.setModel(new DefaultComboBoxModel(new String[] {"Select Filter", "Price", "Volume", "Name"}));
 		comboBox.setBounds(294, 11, 129, 20);
-		panel_1.add(comboBox);
+		tradePanel.add(comboBox);
 		
 		JList list = new JList();
 		list.setBounds(174, 191, -115, -85);
-		panel_1.add(list);
+		tradePanel.add(list);
 		
-		String [] ticketString = {"General Concern", "Payment Issue", "Account"}; 
-		
-		JPanel panel_3 = new JPanel();
-		
-		tabbedPane.addTab("Graph", null, panel_3, null);
-		
-//		JButton btnNewButton = new JButton("New button");
-//		btnNewButton.setBounds(0, 0, 89, 23);
-//		panel_1.add(btnNewButton);
+		final String [] ticketString = {"General Concern", "Payment Issue", "Account"}; 
 
 		JPanel panel_2 = new JPanel();
 		tabbedPane.addTab("Tickets", null, panel_2, null);
 		panel_2.setLayout(null);
 		
-		textField = new JTextField();
-		textField.setBounds(126, 51, 126, 20);
-		panel_2.add(textField);
-		textField.setColumns(10);
+		titleField = new JTextField();
+		titleField.setBounds(126, 51, 126, 20);
+		panel_2.add(titleField);
+		titleField.setColumns(10);
 		
-		textField_1 = new JTextField();
-		textField_1.setBounds(84, 107, 210, 82);
-		panel_2.add(textField_1);
-		textField_1.setColumns(10);
+		descField = new JTextArea();
+		descField.setBounds(84, 107, 210, 82);
+		panel_2.add(descField);
+		descField.setColumns(10);
+		descField.setLineWrap(true);
 		
 		JLabel lblDescription = new JLabel("Description");
 		lblDescription.setHorizontalAlignment(SwingConstants.CENTER);
@@ -346,12 +356,27 @@ public class MainScreen {
 		lblNewLabel.setToolTipText("");
 		lblNewLabel.setBounds(163, 30, 46, 14);
 		panel_2.add(lblNewLabel);
-		JComboBox comboBox_1 = new JComboBox(ticketString);
-		comboBox_1.setBounds(281, 42, 118, 20);
-		panel_2.add(comboBox_1);
+		
+		final JComboBox ticketType = new JComboBox(ticketString);
+		ticketType.setBounds(281, 42, 118, 20);
+		panel_2.add(ticketType);
 		
 		JButton btnSubmit = new JButton("Submit");
 		btnSubmit.setBounds(330, 199, 89, 23);
 		panel_2.add(btnSubmit);
+		btnSubmit.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e){
+				try(FileWriter ticketWriter = new FileWriter(LoginScreen.ticketsFile,true)) {
+					final String LINEBREAK = System.lineSeparator();
+					
+					ticketWriter.write(ticketString[ticketType.getSelectedIndex()] + LINEBREAK);
+					ticketWriter.write(titleField.getText() + LINEBREAK);
+					ticketWriter.write(descField.getText() + LINEBREAK);
+					ticketWriter.write(LINEBREAK);
+				} catch (IOException e1) {
+					System.err.println("Failed to write to tickets file");
+				}
+			}
+		});
 	}
 }

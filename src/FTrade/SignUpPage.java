@@ -1,7 +1,15 @@
-import java.awt.EventQueue;
+package FTrade;
+
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Scanner;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -16,37 +24,41 @@ public class SignUpPage {
 
 	private JFrame frame;
 	private JTextField emailTextField;
+	private String currentUser = LoginScreen.loginInfo[0];
 
 	/**
 	 * Launch the application.
 	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					SignUpPage window = new SignUpPage();
-					window.frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
+//	public static void main(String[] args) {
+//		EventQueue.invokeLater(new Runnable() {
+//			public void run() {
+//				try {
+//					SignUpPage window = new SignUpPage();
+//					window.frame.setVisible(true);
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		});
+//	}
 
 	/**
 	 * Create the application.
 	 */
 	public SignUpPage() {
-		initialize();
+			initialize();
 		frame.setVisible(true);
 	}
 
 	/**
 	 * Initialize the contents of the frame.
+	 * @throws IOException 
 	 */
 	private void initialize() {
+			
+		
 		frame = new JFrame();
-		frame.setBounds(100, 100, 450, 300);
+		frame.setBounds(100, 100, 450, 320);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		frame.setLocationRelativeTo( null );
@@ -93,10 +105,31 @@ public class SignUpPage {
 		frame.getContentPane().add(confirmPassword);
 		
 		JButton btnCreatePassword = new JButton("Create account");
-		btnCreatePassword.setBounds(146, 233, 131, 26);
+		btnCreatePassword.setBounds(240, 233, 131, 26);
 		frame.getContentPane().add(btnCreatePassword);
 		btnCreatePassword.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				
+				try{
+					Scanner usernameCheck = new Scanner(new File("accounts/accounts.dat"));
+					
+					while(usernameCheck.hasNext()){
+						if(userNameTextField.getText().equals(usernameCheck.next())){
+							JOptionPane.showMessageDialog(null, "Username already exists", 
+									"Invalid Username", JOptionPane.ERROR_MESSAGE);
+							userNameTextField.setText("");
+							passwordField.setText("");
+							confirmPassword.setText("");
+							emailTextField.setText("");
+							return;
+						}
+					}
+				}
+				catch(FileNotFoundException fnfe){
+					System.err.println("Accounts file not found during login check");
+					System.exit(1);
+				}
+				
 				
 				//checking input validation
 				if(userNameTextField.getText().length()>0 && passwordField.getText().length()>0 &&
@@ -108,8 +141,35 @@ public class SignUpPage {
 								/*
 								 * store user info to a file in here
 								 */
-								new LoginScreen();
-								frame.dispose();
+							char[] newPassword = passwordField.getPassword();
+							for(int i=0; i<newPassword.length; i++){
+								newPassword[i]+=i;
+							}
+							String storePassword = new String(newPassword);
+							System.out.println(newPassword);
+							String newAccount = new String(String.format("%s %s %s\n", userNameTextField.getText(),
+									storePassword, emailTextField.getText()));
+
+							try (PrintWriter accountWriter = new PrintWriter(
+									new BufferedWriter(new FileWriter(LoginScreen.accountsFile, true)));) {
+								
+
+								accountWriter.write(newAccount);
+
+							} catch (IOException e1) {
+								System.err.println("newAccount format failed");
+								e1.printStackTrace();
+							}
+							
+							try {
+								new File("accounts/users/" + userNameTextField.getText()).createNewFile();
+							} catch (IOException e1) {
+								System.err.println("Account file creation failed");
+								e1.printStackTrace();
+							}
+							
+							new LoginScreen();
+							frame.dispose();
 						}else {
 							JOptionPane.showMessageDialog(null, "Invalid Email address");
 						}
@@ -120,6 +180,18 @@ public class SignUpPage {
 					JOptionPane.showMessageDialog(null, "Please fill up all required information");
 				}
 			}
+		});
+		
+		JButton cancelButton = new JButton("Cancel");
+		cancelButton.setBounds(80, 233, 131, 26);
+		frame.getContentPane().add(cancelButton);
+		cancelButton.addActionListener(new ActionListener(){
+
+			public void actionPerformed(ActionEvent e) {
+				new LoginScreen();
+				frame.dispose();
+			}
+			
 		});
 		
 		JLabel lblEmail = new JLabel("Email:");
