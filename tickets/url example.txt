@@ -1,0 +1,13 @@
+http://finance.yahoo.com/d/quotes.csv?s=ORCL+GM+FDX+EBAY+AMZN+KO+AAPL+GOOG+MSFT+IBM+HPQ+TYO+SBUX+TSLA+TM+SNE+UPS&f=nl1a2
+
+
+
+FDX
+EBAY
+AMZN
+
+
+//reference
+http://finance.yahoo.com/d/quotes.csv?s=ORCL+GM+FDX+EBAY+AMZN&f=
+https://web.archive.org/web/20070202030749/http://www.gummy-stuff.org/Yahoo-data.htm
+http://www.blogbyben.com/2009/01/truly-simple-stock-api.html
