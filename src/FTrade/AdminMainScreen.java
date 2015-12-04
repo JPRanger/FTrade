@@ -48,11 +48,11 @@ public class AdminMainScreen {
 		tabbedPane.setBounds(0, 0, 434, 25);
 		frame.getContentPane().add(tabbedPane);
 		
-		JPanel panel = new JPanel();
-		tabbedPane.addTab("Tickets", null, panel, null);
+		JPanel ticketPanel = new JPanel();
+		tabbedPane.addTab("Tickets", null, ticketPanel, null);
 		
-		JPanel panel_1 = new JPanel();
-		tabbedPane.addTab("Accounts", null, panel_1, null);
+		JPanel accountsPanel = new JPanel();
+		tabbedPane.addTab("Accounts", null, accountsPanel, null);
 	
 	}
 
