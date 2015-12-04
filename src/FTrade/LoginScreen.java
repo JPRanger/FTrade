@@ -1,9 +1,7 @@
-import java.awt.EventQueue;
-import java.awt.FlowLayout;
+package FTrade;
 
+import java.awt.EventQueue;
 import javax.swing.JFrame;
-import javax.swing.JTextArea;
-import java.awt.BorderLayout;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
@@ -11,6 +9,10 @@ import java.awt.Font;
 import javax.swing.JTextField;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Scanner;
 import java.awt.event.ActionEvent;
 import javax.swing.JPasswordField;
 import javax.swing.ImageIcon;
@@ -18,8 +20,13 @@ import javax.swing.ImageIcon;
 public class LoginScreen {
 
 	private JFrame frame;
-	private JTextField textField;
+	private JTextField usernameField;
 	private JPasswordField passwordField;
+	private Scanner loginCheck;
+	protected static String[] loginInfo = new String[3];
+	protected static File accountsFile = new File("accounts/accounts.dat");
+	protected static File ticketsFile = new File("tickets/tickets.dat");
+	protected static File usersFolder = new File("accounts/users");
 
 	/**
 	 * Launch the application.
@@ -47,7 +54,21 @@ public class LoginScreen {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		frame = new JFrame();
+		/*Create data storage files*/
+		try{
+			File ticketsDir = new File("tickets");
+			File accountsDir = new File("accounts");
+			ticketsDir.mkdirs();
+			accountsDir.mkdirs();
+			usersFolder.mkdirs();
+			accountsFile.createNewFile();
+			ticketsFile.createNewFile();
+		}
+		catch(IOException ioe){
+			System.err.println("File initialization failed");
+		}
+		
+		frame = new JFrame("FTrade");
 		frame.setResizable(false);
 		frame.setBounds(100, 100, 450, 300);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -60,10 +81,10 @@ public class LoginScreen {
 		lblEnterUserName.setFont(new Font("Superclarendon", Font.PLAIN, 36));
 		frame.getContentPane().add(lblEnterUserName);
 		
-		textField = new JTextField();
-		textField.setBounds(171, 78, 131, 30);
-		frame.getContentPane().add(textField);
-		textField.setColumns(10);
+		usernameField = new JTextField();
+		usernameField.setBounds(171, 78, 131, 30);
+		frame.getContentPane().add(usernameField);
+		usernameField.setColumns(10);
 		
 		JLabel lblUsername = new JLabel("Username:");
 		lblUsername.setFont(new Font("Tahoma", Font.PLAIN, 20));
@@ -79,9 +100,48 @@ public class LoginScreen {
 		btnLogin.setBounds(199, 172, 78, 26);
 		frame.getContentPane().add(btnLogin);
 		btnLogin.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent e){
-				new MainScreen();
-				frame.dispose();
+			public void actionPerformed(ActionEvent e){ 
+				/*Check password*/
+				String fieldPassword = new String(passwordField.getPassword()).trim();
+				try{
+					loginCheck = new Scanner(new File("accounts/accounts.dat"));
+				}
+				catch(FileNotFoundException fnfe){
+					System.err.println("Accounts file not found during login check");
+					System.exit(1);
+				}
+				while(loginCheck.hasNext()){
+					String checkUsername = loginCheck.next();
+					if(checkUsername.equals(usernameField.getText())){
+						loginInfo[0] = checkUsername;
+						char[] passwordConvert = loginCheck.next().toCharArray();
+						for(int i=0; i<passwordConvert.length; i++){
+							passwordConvert[i]-=i;
+						}
+						loginInfo[1] = new String(passwordConvert).trim();
+						loginInfo[2] = loginCheck.next();
+						if(fieldPassword.equals(loginInfo[1])){
+							new MainScreen();
+							frame.dispose();
+							break;
+						}
+						else{
+							usernameField.setText("");
+							passwordField.setText("");
+							JOptionPane.showMessageDialog(null, "Username or password incorrect.", "Incorrect Login", 
+									JOptionPane.ERROR_MESSAGE);
+						}
+					}
+					else{
+						if(loginCheck.hasNext()){
+							continue;
+						}
+						usernameField.setText("");
+						passwordField.setText("");
+						JOptionPane.showMessageDialog(null, "Username not found", "No Such User", 
+								JOptionPane.ERROR_MESSAGE);
+					}
+				}
 			}
 		});
 		
@@ -100,17 +160,26 @@ public class LoginScreen {
 		btnForgotPassword.setBounds(244, 213, 146, 26);
 		frame.getContentPane().add(btnForgotPassword);
 		btnForgotPassword.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
+			public void actionPerformed(ActionEvent e) {
 				while(true) {
 					String input = JOptionPane.showInputDialog(null, "Please enter your Email");
+					/*Close if cancel is pressed*/
+					if(input==null){
+						break;
+					}
 					if(input.contains("@")){
 						/*
 						 * input is user Email, check Email in the file
 						 */
+						while(loginCheck.hasNext()){
+							
+						}
+						
 						JOptionPane.showMessageDialog(null, "Password has been sent to your Email");
 						break;
 					} 
 						JOptionPane.showMessageDialog(null, "Invalid Email");
+						
 				}//end loop				
 			}
 		});
