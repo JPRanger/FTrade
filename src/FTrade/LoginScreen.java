@@ -26,6 +26,7 @@ public class LoginScreen {
 	protected static String[] loginInfo = new String[3];
 	protected static File accountsFile = new File("accounts/accounts.dat");
 	protected static File ticketsFile = new File("tickets/tickets.dat");
+	protected static File usersFolder = new File("accounts/users");
 
 	/**
 	 * Launch the application.
@@ -59,6 +60,7 @@ public class LoginScreen {
 			File accountsDir = new File("accounts");
 			ticketsDir.mkdirs();
 			accountsDir.mkdirs();
+			usersFolder.mkdirs();
 			accountsFile.createNewFile();
 			ticketsFile.createNewFile();
 		}

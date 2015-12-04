@@ -113,7 +113,7 @@ public class MainScreen {
 		tabbedPane.addTab("News", null, panel, null);
 		panel.setLayout(null);
 
-		
+		JPanel fundsPanel = new JPanel();
 		
 		JLabel lblNews = new JLabel("News");
 		lblNews.setFont(new Font("Thames", Font.BOLD | Font.ITALIC, 25));

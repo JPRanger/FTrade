@@ -160,9 +160,16 @@ public class SignUpPage {
 								System.err.println("newAccount format failed");
 								e1.printStackTrace();
 							}
-
-								new LoginScreen();
-								frame.dispose();
+							
+							try {
+								new File("accounts/users/" + userNameTextField.getText()).createNewFile();
+							} catch (IOException e1) {
+								System.err.println("Account file creation failed");
+								e1.printStackTrace();
+							}
+							
+							new LoginScreen();
+							frame.dispose();
 						}else {
 							JOptionPane.showMessageDialog(null, "Invalid Email address");
 						}
