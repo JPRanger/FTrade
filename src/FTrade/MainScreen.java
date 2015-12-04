@@ -12,7 +12,9 @@ import javax.swing.JTextField;
 import javax.swing.JLabel;
 
 import java.awt.Font;
+import java.awt.GridLayout;
 import java.awt.Color;
+import java.awt.FlowLayout;
 
 import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
@@ -107,43 +109,46 @@ public class MainScreen {
 		frame.setLocationRelativeTo( null );
 		frame.setTitle("FTrade: " + LoginScreen.loginInfo[0]);
 		
-		JPanel panel = new JPanel();
-		panel.setBackground(new Color(255, 255, 255));
-		panel.setToolTipText("");
-		tabbedPane.addTab("News", null, panel, null);
-		panel.setLayout(null);
+		JPanel newsPanel = new JPanel();
+		newsPanel.setBackground(new Color(255, 255, 255));
+		newsPanel.setToolTipText("");
+		tabbedPane.addTab("News", null, newsPanel, null);
+		newsPanel.setLayout(null);
 
 		JPanel fundsPanel = new JPanel();
+		fundsPanel.setLayout(new FlowLayout(FlowLayout.TRAILING));
+		fundsPanel.add(new JLabel("Funds"));
+		frame.add(fundsPanel, BorderLayout.SOUTH);
 		
 		JLabel lblNews = new JLabel("News");
 		lblNews.setFont(new Font("Thames", Font.BOLD | Font.ITALIC, 25));
 		lblNews.setBounds(38, 11, 91, 32);
-		panel.add(lblNews);
+		newsPanel.add(lblNews);
 		
 		final JLabel lblHeadLine1 = new JLabel();
 		lblHeadLine1.setText(headLines1);
 		lblHeadLine1.setBounds(23, 54, 381, 32);
-		panel.add(lblHeadLine1);
+		newsPanel.add(lblHeadLine1);
 		
 		final JLabel lblHeadLine2 = new JLabel();
 		lblHeadLine2.setText(headLines2);
 		lblHeadLine2.setBounds(23, 91, 381, 32);
-		panel.add(lblHeadLine2);
+		newsPanel.add(lblHeadLine2);
 		
 		final JLabel lblHeadLine3 = new JLabel();
 		lblHeadLine3.setText(headLines3);
 		lblHeadLine3.setBounds(23, 134, 381, 32);
-		panel.add(lblHeadLine3);
+		newsPanel.add(lblHeadLine3);
 		
 		final JLabel lblHeadLine4 = new JLabel();
 		lblHeadLine4.setText(headLines4);
 		lblHeadLine4.setBounds(23, 177, 381, 32);
-		panel.add(lblHeadLine4);
+		newsPanel.add(lblHeadLine4);
 		
 		JLabel lblNewLabel_2 = new JLabel("");
 		lblNewLabel_2.setIcon(new ImageIcon("image/bkgd.jpg"));
 		lblNewLabel_2.setBounds(0, 0, 429, 233);
-		panel.add(lblNewLabel_2);
+		newsPanel.add(lblNewLabel_2);
 		Timer timer = new Timer(4000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
