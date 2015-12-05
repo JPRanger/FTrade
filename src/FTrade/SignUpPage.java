@@ -111,7 +111,7 @@ public class SignUpPage {
 			public void actionPerformed(ActionEvent e) {
 				
 				try{
-					Scanner usernameCheck = new Scanner(new File("accounts/accounts.dat"));
+					Scanner usernameCheck = new Scanner(new File("accounts/accounts.csv"));
 					
 					while(usernameCheck.hasNext()){
 						if(userNameTextField.getText().equals(usernameCheck.next())){
@@ -147,7 +147,7 @@ public class SignUpPage {
 							}
 							String storePassword = new String(newPassword);
 							System.out.println(newPassword);
-							String newAccount = new String(String.format("%s %s %s\n", userNameTextField.getText(),
+							String newAccount = new String(String.format("%s, %s, %s\n", userNameTextField.getText(),
 									storePassword, emailTextField.getText()));
 
 							try (PrintWriter accountWriter = new PrintWriter(

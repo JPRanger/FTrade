@@ -1,11 +1,15 @@
 package FTrade;
 
+import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import java.awt.Font;
+import java.awt.Window;
+
 import javax.swing.JTextField;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
@@ -31,8 +35,8 @@ public class LoginScreen {
 	private JPasswordField passwordField;
 	private Scanner loginCheck;
 	protected static String[] loginInfo = new String[3];
-	protected static File accountsFile = new File("accounts/accounts.dat");
-	protected static File ticketsFile = new File("tickets/tickets.dat");
+	protected static File accountsFile = new File("accounts/accounts.csv");
+	protected static File ticketsFile = new File("tickets/tickets.csv");
 	protected static File usersFolder = new File("accounts/users");
 
 	/**
@@ -175,9 +179,14 @@ public class LoginScreen {
 						break;
 					}
 					if(input.contains("@")){
+						JFrame workingDialog = new JFrame("Please Wait");
+						workingDialog.setSize(800, 500);
+						JLabel workingLabel = new JLabel("Working...");
+						workingDialog.add(workingLabel, BorderLayout.CENTER);
 						/*
 						 * input is user Email, check Email in the file
 						 */
+						boolean wasSent = false;
 						String to = null;
 						String userPassword = null;
 						String host = "smtp.gmail.com";
@@ -223,6 +232,8 @@ public class LoginScreen {
 									transport.sendMessage(message, message.getAllRecipients());
 									transport.close();
 									
+									wasSent = true;
+									
 								}catch(MessagingException me){
 									System.out.println("Failed to send message");
 									System.out.println(me.getLocalizedMessage());
@@ -233,9 +244,15 @@ public class LoginScreen {
 								userPassword = to;
 							}
 						}
-						
-						JOptionPane.showMessageDialog(null, "Password has been sent to your Email");
-						break;
+						if(wasSent){
+							workingDialog.dispose();
+							JOptionPane.showMessageDialog(null, "Password has been sent to your Email");
+							break;
+						}
+						else{ //No message sent
+							JOptionPane.showMessageDialog(null, "Email not registered");
+							break;
+						}
 					} 
 						JOptionPane.showMessageDialog(null, "Invalid Email");
 						
