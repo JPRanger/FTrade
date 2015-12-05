@@ -146,7 +146,7 @@ public class MainScreen {
 		newsPanel.add(lblHeadLine4);
 		
 		JLabel lblNewLabel_2 = new JLabel("");
-		lblNewLabel_2.setIcon(new ImageIcon("image/bkgd.jpg"));
+		lblNewLabel_2.setIcon(new ImageIcon(getClass().getResource("/image/bkgd.jpg")));
 		lblNewLabel_2.setBounds(0, 0, 429, 233);
 		newsPanel.add(lblNewLabel_2);
 		Timer timer = new Timer(4000, new ActionListener() {

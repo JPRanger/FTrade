@@ -12,9 +12,16 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Properties;
 import java.util.Scanner;
 import java.awt.event.ActionEvent;
 import javax.swing.JPasswordField;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import javax.swing.ImageIcon;
 
 public class LoginScreen {
@@ -171,8 +178,60 @@ public class LoginScreen {
 						/*
 						 * input is user Email, check Email in the file
 						 */
+						String to = null;
+						String userPassword = null;
+						String host = "smtp.gmail.com";
+				        String from = "ftradeas@gmail.com";
+				        String pass = "ftradeaccountsupport";
+				        
+				        Properties props = System.getProperties();
+				        props.put("mail.smtp.ssl.enable", "true"); // added this line
+				        props.put("mail.smtp.host", host);
+				        props.put("mail.smtp.user", from);
+				        props.put("mail.smtp.password", pass);
+				        props.put("mail.smtp.port", "465");
+				        props.put("mail.smtp.auth", "true");
+						
+						Session session = Session.getDefaultInstance(props, null);
+						
+						try {
+							loginCheck = new Scanner(new File("accounts/accounts.dat"));
+						} catch (FileNotFoundException e1) {
+							System.out.println("Error opening accounts file");
+							e1.printStackTrace();
+						}
+						
 						while(loginCheck.hasNext()){
-							
+							if((to = loginCheck.next()).equals(input) && to != null){
+								try{
+									MimeMessage message = new MimeMessage(session);
+									
+									message.setFrom(new InternetAddress(from));
+									message.setRecipient(Message.RecipientType.TO, new InternetAddress(to));
+									message.setSubject("Forgot Password - FTrade");
+									
+									char[] userPassConvert = userPassword.toCharArray();
+									userPassword = "";
+									for(int i=0; i < userPassConvert.length; i++){
+										userPassConvert[i] -= i;
+										userPassword+= userPassConvert[i];
+									}
+									message.setText("Your password is: " + userPassword);
+									
+									Transport transport = session.getTransport("smtp");
+									transport.connect(host, from, pass);
+									transport.sendMessage(message, message.getAllRecipients());
+									transport.close();
+									
+								}catch(MessagingException me){
+									System.out.println("Failed to send message");
+									System.out.println(me.getLocalizedMessage());
+									me.printStackTrace();
+								}
+							}
+							else{ //Password comes before email, so store previous entry in case email found
+								userPassword = to;
+							}
 						}
 						
 						JOptionPane.showMessageDialog(null, "Password has been sent to your Email");
@@ -189,7 +248,7 @@ public class LoginScreen {
 		frame.getContentPane().add(passwordField);
 		
 		JLabel label = new JLabel("");
-		label.setIcon(new ImageIcon("image/bkgd.jpg"));
+		label.setIcon(new ImageIcon(getClass().getResource("/image/bkgd.jpg")));
 		label.setBounds(0, 0, 450, 278);
 		frame.getContentPane().add(label);
 	}

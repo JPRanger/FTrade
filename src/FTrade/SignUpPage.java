@@ -205,7 +205,7 @@ public class SignUpPage {
 		emailTextField.setColumns(10);
 		
 		JLabel label = new JLabel("");
-		label.setIcon(new ImageIcon("image/bkgd.jpg"));
+		label.setIcon(new ImageIcon(getClass().getResource("/image/bkgd.jpg")));
 		label.setBounds(0, 0, 450, 278);
 		frame.getContentPane().add(label);
 	}
