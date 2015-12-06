@@ -5,5 +5,7 @@
 	<classpathentry kind="lib" path="/home/josh/workspace/FTrade/jars/ant-javamail.jar"/>
 	<classpathentry kind="lib" path="/home/josh/workspace/FTrade/jars/javax.mail.jar"/>
 	<classpathentry kind="lib" path="/home/josh/workspace/FTrade/jars/opencsv-3.6.jar"/>
+	<classpathentry kind="lib" path="/home/josh/workspace/FTrade/jars/commons-io-2.4.jar"/>
+	<classpathentry kind="lib" path="/home/josh/workspace/FTrade/jars/commons-io-2.4-javadoc.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
