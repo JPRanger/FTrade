@@ -6,6 +6,8 @@ import java.awt.event.ActionListener;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -20,11 +22,17 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
+import org.apache.commons.io.FileUtils;
+
+import com.opencsv.CSVReader;
+
 public class SignUpPage {
 
 	private JFrame frame;
 	private JTextField emailTextField;
 	private String currentUser = LoginScreen.loginInfo[0];
+	CSVReader newUserReader;
+	FileWriter newUserCreator, newUserFunds;
 
 	/**
 	 * Launch the application.
@@ -110,11 +118,10 @@ public class SignUpPage {
 		btnCreatePassword.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				
-				try{
-					Scanner usernameCheck = new Scanner(new File("accounts/accounts.csv"));
-					
-					while(usernameCheck.hasNext()){
-						if(userNameTextField.getText().equals(usernameCheck.next())){
+				String[] checkUsername;
+				try(CSVReader usernameCheck = new CSVReader(new FileReader("accounts/accounts.csv"))){
+					while((checkUsername = usernameCheck.readNext()) != null){
+						if(checkUsername[0].equals(userNameTextField.getText())){
 							JOptionPane.showMessageDialog(null, "Username already exists", 
 									"Invalid Username", JOptionPane.ERROR_MESSAGE);
 							userNameTextField.setText("");
@@ -128,6 +135,9 @@ public class SignUpPage {
 				catch(FileNotFoundException fnfe){
 					System.err.println("Accounts file not found during login check");
 					System.exit(1);
+				} catch (IOException e2) {
+					// TODO Auto-generated catch block
+					e2.printStackTrace();
 				}
 				
 				
@@ -154,18 +164,63 @@ public class SignUpPage {
 									new BufferedWriter(new FileWriter(LoginScreen.accountsFile, true)));) {
 								
 
-								accountWriter.write(newAccount);
+							accountWriter.write(newAccount);
 
 							} catch (IOException e1) {
 								System.err.println("newAccount format failed");
 								e1.printStackTrace();
-							}
+							} 
 							
 							try {
-								new File("accounts/users/" + userNameTextField.getText()).createNewFile();
+								/*Create directory and files for new user*/
+								File dir = new File("accounts/users/" + userNameTextField.getText());
+								dir.mkdirs();
+								String numSharesInitStr = String.format("accounts/users/%s/CurrentShares.csv", 
+										userNameTextField.getText());
+								File numSharesInit = new File(numSharesInitStr);
+								numSharesInit.createNewFile();
+								String fundsInitStr = String.format("accounts/users/%s/CurrentFunds.dat",
+										userNameTextField.getText());
+								File fundsInit = new File(fundsInitStr);
+								fundsInit.createNewFile();
+								
+								/*Set starting funds to $500*/
+								newUserFunds = new FileWriter(fundsInit);
+								String initFunds = "500";
+								newUserFunds.write(initFunds);
+								newUserFunds.flush();
+								
+								/*Update sorted_by_name.csv to store number of shares, not volume*/
+								File source = new File("tickets/sorted_by_name.csv");
+								File dest = numSharesInit;
+								
+								newUserReader = new CSVReader(new FileReader(source));
+								newUserCreator = new FileWriter(dest, true);
+								String[] userInfo;
+								
+								while((userInfo = newUserReader.readNext()) != null){
+									userInfo[2] = "0";
+									String currentStockLine = String.format("%s, %s, %s", userInfo[0], 
+											userInfo[1], userInfo[2]);
+									newUserCreator.write(currentStockLine);
+									newUserCreator.write(System.lineSeparator());
+									newUserCreator.flush();
+								}
+								
+								
+								
 							} catch (IOException e1) {
 								System.err.println("Account file creation failed");
 								e1.printStackTrace();
+							} finally{
+								try {
+									newUserReader.close();
+									newUserCreator.close();
+								} catch (IOException e1) {
+									System.err.println("Failed to close file creation read/write");
+									e1.printStackTrace();
+								}
+								
 							}
 							
 							new LoginScreen();

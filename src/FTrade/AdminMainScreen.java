@@ -2,6 +2,8 @@ package FTrade;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -65,9 +67,20 @@ public class AdminMainScreen {
 		tabbedPane.addTab("Tickets", null, TicketPanel, null);
 		TicketPanel.setLayout(null);
 		
+		JPanel logoutPanel = new JPanel();
+		JButton logoutButton = new JButton("Logout");
+		logoutButton.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {
+				new LoginScreen();
+				frame.dispose();
+			}
+		});
+		logoutPanel.add(logoutButton, BorderLayout.WEST);
+		frame.add(logoutPanel, BorderLayout.SOUTH);
+		
 		//row column
 		final Object[][] rowTickets = {};
-		final Object[] columnTickets = {"UserName","Password", "E-mail"};
+		final Object[] columnTickets = {"User ID","Title", "Description"};
 	    DefaultTableModel model;
 	    model = new DefaultTableModel(rowTickets, columnTickets){
 	    	   public boolean isCellEditable(int rowTickets, int columnTickets){
@@ -95,6 +108,10 @@ public class AdminMainScreen {
 							
 							if(i == tokens.length -1)
 							{
+								/*Trim extra brackets*/
+								tokens[0] = tokens[0].substring(1);
+								tokens[2] = tokens[2].substring(0, tokens[2].length()-1);
+								
 								model.addRow(new Object[]{tokens[0], tokens[1],tokens[2]});
 							}
 						}
@@ -158,6 +175,10 @@ public class AdminMainScreen {
 							
 							if(i == tokens.length -1)
 							{
+								/*Trim extra brackets*/
+								tokens[0] = tokens[0].substring(1);
+								tokens[2] = tokens[2].substring(0, tokens[2].length()-1);
+								
 								model1.addRow(new Object[]{tokens[0], tokens[1],tokens[2]});
 							}
 						}

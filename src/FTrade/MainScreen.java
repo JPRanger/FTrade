@@ -25,6 +25,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -55,14 +59,15 @@ public class MainScreen {
 	private JFrame frame;
 	private final JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 	private JTextField txtSearch;
-	private JButton btnBuySell;
-	private String[] names = { "Coca-Cola", "Apple", "Google", "Microsoft", "Sony", "Florida Gulf Coast University",
-			"Dell", "Hewlett-Packard", "Toshiba", "Amazon", "EBay", "UPS", "FedEx", "Toyota", "GMC", "Tesla",
-			"Starbucks" };
-	// Test cases: a,os
-	private JButton[] results = new JButton[names.length];
+	private JButton btnSearch;
+	private JTable table;
+	private int row, column;
+	private double price, funds;
+	CSVReader fundsReader;
 	private JTextField titleField;
 	private JTextArea descField;
+	private JPanel fundsPanel;
+	private JButton logoutButton;
 	// string stores news for JLabels
 	private String headLines1 = "\u2022 American Airlines tops profit estimates";
 	private String headLines2 = "\u2022 Microsoft to lay off 1,000 more workers: reports";
@@ -124,10 +129,40 @@ public class MainScreen {
 		tabbedPane.addTab("News", null, newsPanel, null);
 		newsPanel.setLayout(null);
 
-		JPanel fundsPanel = new JPanel();
-		fundsPanel.setLayout(new FlowLayout(FlowLayout.TRAILING));
-		fundsPanel.add(new JLabel("Funds"));
-		frame.add(fundsPanel, BorderLayout.SOUTH);
+		try {
+			fundsReader = new CSVReader(
+					new FileReader("accounts/users/" + LoginScreen.loginInfo[0] + "/CurrentFunds.dat"));
+
+			fundsPanel = new JPanel();
+			fundsPanel.setLayout(new BorderLayout());
+			funds = Double.parseDouble(fundsReader.readNext()[0]);
+
+			logoutButton = new JButton("Logout");
+			logoutButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					new LoginScreen();
+					frame.dispose();
+				}
+			});
+
+			fundsPanel.add(logoutButton, BorderLayout.WEST);
+			fundsPanel.add(new JLabel(String.format("Current Funds: $%.2f", funds)), BorderLayout.EAST);
+
+			frame.add(fundsPanel, BorderLayout.SOUTH);
+		} catch (FileNotFoundException e3) {
+			System.err.println("Current funds reader failed to open");
+			e3.printStackTrace();
+		} catch (IOException e1) {
+			System.err.println("Failed to read current funds");
+			e1.printStackTrace();
+		} finally {
+			try {
+				fundsReader.close();
+			} catch (IOException e1) {
+				System.err.println("Failed to close funds reader");
+				e1.printStackTrace();
+			}
+		}
 
 		JLabel lblNews = new JLabel("News");
 		lblNews.setFont(new Font("Thames", Font.BOLD | Font.ITALIC, 25));
@@ -197,34 +232,36 @@ public class MainScreen {
 		timer.setCoalesce(true);
 		timer.start();
 
-		final JPanel tradePanel = new JPanel();
-		tradePanel.setBackground(UIManager.getColor("Button.background"));
-		tabbedPane.addTab("Trade", null, tradePanel, null);
-		tradePanel.setLayout(null);
+		final JPanel panel_1 = new JPanel();
+		panel_1.setBackground(UIManager.getColor("Button.background"));
+		tabbedPane.addTab("Trade", null, panel_1, null);
+		panel_1.setLayout(null);
 
-		JComboBox comboBox = new JComboBox();
+		final JComboBox comboBox = new JComboBox();
 
-		comboBox.setModel(new DefaultComboBoxModel(new String[] { "Select Filter", "Price", "Volume", "Name" }));
+		comboBox.setModel(new DefaultComboBoxModel(new String[] { "Name", "Volume", "Price" }));
 		comboBox.setBounds(294, 11, 129, 20);
-		tradePanel.add(comboBox);
+		panel_1.add(comboBox);
 
 		final Object[][] rowData = {};
 		final Object[] columnNames = { "Name", "Price", "Volume" };
 
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setBounds(0, 0, 284, 233);
-		tradePanel.add(scrollPane);
-		JTable table = new JTable();
+		panel_1.add(scrollPane);
+		table = new JTable();
 		scrollPane.setViewportView(table);
-		DefaultTableModel model;
+		final DefaultTableModel model;
 		model = new DefaultTableModel(rowData, columnNames) {
 			public boolean isCellEditable(int rowData, int columnNames) {
 				return false;
 			}
 		};
+
+		// default sorted by name
 		CSVReader reader = null;
 		try {
-			reader = new CSVReader(new FileReader("tickets/quotes.csv"), ',', '"');
+			reader = new CSVReader(new FileReader("tickets/sorted_by_name.csv"), ',', '"');
 		} catch (FileNotFoundException e2) {
 			// TODO Auto-generated catch block
 			e2.printStackTrace();
@@ -242,6 +279,10 @@ public class MainScreen {
 					{
 
 						if (i == tokens.length - 1) {
+							/* Trim extra brackets */
+							tokens[0] = tokens[0].substring(1);
+							tokens[2] = tokens[2].substring(0, tokens[2].length() - 1);
+
 							model.addRow(new Object[] { tokens[0], tokens[1], tokens[2] });
 						}
 					}
@@ -253,14 +294,161 @@ public class MainScreen {
 			e2.printStackTrace();
 		}
 
-		table.setModel(model);
+		table.setModel(model);// end default
 
-		for (int i = 0; i < results.length; i++) {
-			results[i] = new JButton(names[i]);
-			results[i].addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
+		// starting sorting by price/volume/name/keyword
+		// sorted by price
+		comboBox.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				final DefaultTableModel model;
+				model = new DefaultTableModel(rowData, columnNames) {
+					public boolean isCellEditable(int rowData, int columnNames) {
+						return false;
+					}
+				};
+				// sorted by price
+				if (comboBox.getSelectedItem().equals("Price")) {
+					CSVReader reader = null;
+					try {
+						reader = new CSVReader(new FileReader("tickets/sorted_by_price.csv"), ',', '"');
+					} catch (FileNotFoundException e2) {
+						// TODO Auto-generated catch block
+						e2.printStackTrace();
+					}
+
+					// Read CSV line by line and use the string array as you
+					// want
+					String[] nextLine;
+					try {
+						while ((nextLine = reader.readNext()) != null) {
+							if (nextLine != null) {
+								String temp = Arrays.toString(nextLine);
+								String[] tokens = temp.split(",");
+								StringBuilder sb = new StringBuilder();
+								for (int i = 0; i < tokens.length; i++)// checks
+																		// for
+																		// comma
+								{
+
+									if (i == tokens.length - 1) {
+										/* Trim extra brackets */
+										tokens[0] = tokens[0].substring(1);
+										tokens[2] = tokens[2].substring(0, tokens[2].length() - 1);
+
+										model.addRow(new Object[] { tokens[0], tokens[1], tokens[2] });
+									}
+								}
+
+							}
+						}
+					} catch (IOException e2) {
+						// TODO Auto-generated catch block
+						e2.printStackTrace();
+					}
+					table.setModel(model);
+				} // end price
+
+				// sorted by volume
+				if (comboBox.getSelectedItem().equals("Volume")) {
+					CSVReader reader = null;
+					try {
+						reader = new CSVReader(new FileReader("tickets/sorted_by_volume.csv"), ',', '"');
+					} catch (FileNotFoundException e2) {
+						// TODO Auto-generated catch block
+						e2.printStackTrace();
+					}
+
+					// Read CSV line by line and use the string array as you
+					// want
+					String[] nextLine;
+					try {
+						while ((nextLine = reader.readNext()) != null) {
+							if (nextLine != null) {
+								String temp = Arrays.toString(nextLine);
+								String[] tokens = temp.split(",");
+								StringBuilder sb = new StringBuilder();
+								for (int i = 0; i < tokens.length; i++)// checks
+																		// for
+																		// comma
+								{
+
+									if (i == tokens.length - 1) {
+										/* Trim extra brackets */
+										tokens[0] = tokens[0].substring(1);
+										tokens[2] = tokens[2].substring(0, tokens[2].length() - 1);
+
+										model.addRow(new Object[] { tokens[0], tokens[1], tokens[2] });
+									}
+								}
+
+							}
+						}
+					} catch (IOException e2) {
+						// TODO Auto-generated catch block
+						e2.printStackTrace();
+					}
+					table.setModel(model);
+				} // end volume
+
+				// sorted by name
+				if (comboBox.getSelectedItem().equals("Name")) {
+					CSVReader reader = null;
+					try {
+						reader = new CSVReader(new FileReader("tickets/sorted_by_name.csv"), ',', '"');
+					} catch (FileNotFoundException e2) {
+						// TODO Auto-generated catch block
+						e2.printStackTrace();
+					}
+
+					// Read CSV line by line and use the string array as you
+					// want
+					String[] nextLine;
+					try {
+						while ((nextLine = reader.readNext()) != null) {
+							if (nextLine != null) {
+								String temp = Arrays.toString(nextLine);
+								String[] tokens = temp.split(",");
+								StringBuilder sb = new StringBuilder();
+								for (int i = 0; i < tokens.length; i++)// checks
+																		// for
+																		// comma
+								{
+
+									if (i == tokens.length - 1) {
+										/* Trim extra brackets */
+										tokens[0] = tokens[0].substring(1);
+										tokens[2] = tokens[2].substring(0, tokens[2].length() - 1);
+
+										model.addRow(new Object[] { tokens[0], tokens[1], tokens[2] });
+									}
+								}
+
+							}
+						}
+					} catch (IOException e2) {
+						// TODO Auto-generated catch block
+						e2.printStackTrace();
+					}
+					table.setModel(model);
+				} // end name
+
+				panel_1.revalidate();
+				panel_1.repaint();
+			}
+		});// end sorting of price/volume/name/keyword
+
+		// buy/sell stock
+		table.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+				if (e.getClickCount() == 2) {
+					final JTable target = (JTable) e.getSource();
+					row = target.getSelectedRow(); // the row number that user
+													// clicks, you might need
+													// this for the file
+
+					// popup window for buying/selling stocks
 					final JFrame popup = new JFrame();
-					popup.setBounds(100, 100, 330, 221);
+					popup.setBounds(100, 100, 335, 221);
 					popup.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 					popup.getContentPane().setLayout(null);
 					popup.setLocationRelativeTo(null);
@@ -268,62 +456,283 @@ public class MainScreen {
 					JLabel lblHowManyStock = new JLabel("How much stock would you like to buy/sell?");
 					lblHowManyStock.setHorizontalAlignment(SwingConstants.CENTER);
 					lblHowManyStock.setFont(new Font("Tahoma", Font.BOLD, 13));
-					lblHowManyStock.setBounds(0, 11, 314, 43);
+					lblHowManyStock.setBounds(3, 11, 330, 43);
 					popup.getContentPane().add(lblHowManyStock);
 
 					final JTextField amountField = new JTextField();
-					amountField.setBounds(56, 65, 189, 34);
+					amountField.setBounds(59, 65, 189, 34);
 					popup.getContentPane().add(amountField);
 					amountField.setColumns(10);
 
 					JButton btnBuy = new JButton("Buy");
-					btnBuy.setBounds(28, 130, 89, 23);
+					btnBuy.setBounds(31, 130, 89, 23);
 					popup.getContentPane().add(btnBuy);
 					btnBuy.addActionListener(new ActionListener() {
 						public void actionPerformed(ActionEvent e) {
-							JOptionPane.showMessageDialog(null, "You bought " + amountField.getText() + " stock.");
+							/*
+							 * add stock amount from the file
+							 */
+
+							if (comboBox.getSelectedIndex() == 0) { // sorted by
+																	// name
+								try (CSVReader priceReader = new CSVReader(
+										new FileReader("tickets/sorted_by_name.csv"))) {
+									String[] priceStr = null;
+									while ((priceStr = priceReader.readNext()) != null) {
+										if (priceStr[0].equals(target.getValueAt(row, 0))) {
+											price = Double.parseDouble(priceStr[1]);
+											price *= Double.parseDouble(amountField.getText());
+											funds -= price;
+											if (funds < 0) {
+												funds += price;
+												JOptionPane.showMessageDialog(null, "Not enough funds");
+											} else {
+												JOptionPane.showMessageDialog(null,
+														"You bought " + amountField.getText() + " shares.");
+											}
+											fundsPanel.removeAll();
+											fundsPanel.add(logoutButton, BorderLayout.WEST);
+											fundsPanel.add(new JLabel(String.format("Current Funds: $%.2f", funds)),
+													BorderLayout.EAST);
+											fundsPanel.revalidate();
+										}
+									}
+								} catch (FileNotFoundException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								} catch (IOException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
+							}
+
+							else if (comboBox.getSelectedIndex() == 1) { // sorted
+																			// by
+																			// price
+								try (CSVReader priceReader = new CSVReader(
+										new FileReader("tickets/sorted_by_price.csv"))) {
+									String[] priceStr = null;
+									while ((priceStr = priceReader.readNext()) != null) {
+										if (priceStr[0].equals(target.getValueAt(row, 0))) {
+											price = Double.parseDouble(priceStr[1]);
+											price *= Double.parseDouble(amountField.getText());
+											funds -= price;
+											if (funds < 0) {
+												funds += price;
+												JOptionPane.showMessageDialog(null, "Not enough funds");
+											} else {
+												JOptionPane.showMessageDialog(null,
+														"You bought " + amountField.getText() + " shares.");
+											}
+											fundsPanel.removeAll();
+											fundsPanel.add(logoutButton, BorderLayout.WEST);
+											fundsPanel.add(new JLabel(String.format("Current Funds: $%.2f", funds)),
+													BorderLayout.EAST);
+											fundsPanel.revalidate();
+										}
+									}
+								} catch (FileNotFoundException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								} catch (IOException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
+							}
+
+							else if (comboBox.getSelectedIndex() == 2) { // sorted
+																			// by
+																			// volume
+								try (CSVReader priceReader = new CSVReader(
+										new FileReader("tickets/sorted_by_volume.csv"))) {
+									String[] priceStr = null;
+									while ((priceStr = priceReader.readNext()) != null) {
+										if (priceStr[0].equals(target.getValueAt(row, 0))) {
+											price = Double.parseDouble(priceStr[1]);
+											price *= Double.parseDouble(amountField.getText());
+											funds -= price;
+											if (funds < 0) {
+												funds += price;
+												JOptionPane.showMessageDialog(null, "Not enough funds");
+											} else {
+												JOptionPane.showMessageDialog(null,
+														"You bought " + amountField.getText() + " shares.");
+											}
+											fundsPanel.removeAll();
+											fundsPanel.add(logoutButton, BorderLayout.WEST);
+											fundsPanel.add(new JLabel(String.format("Current Funds: $%.2f", funds)),
+													BorderLayout.EAST);
+											fundsPanel.revalidate();
+										}
+									}
+								} catch (FileNotFoundException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								} catch (IOException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
+							}
+
 							popup.dispose();
 						}
 
 					});
 
 					JButton btnSell = new JButton("Sell");
-					btnSell.setBounds(187, 130, 89, 23);
+					btnSell.setBounds(190, 130, 89, 23);
 					popup.getContentPane().add(btnSell);
+					btnSell.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							boolean canSell = false;
+							/*
+							 * reduce stock amount from the file
+							 */
+							if (comboBox.getSelectedIndex() == 0) { // sorted by
+																	// name
+								try (CSVReader sharesReader = new CSVReader(new FileReader(String
+										.format("accounts/users/%s/CurrentShares.csv", LoginScreen.loginInfo[0])))) {
+									String[] sharesStr;
+									while ((sharesStr = sharesReader.readNext()) != null) {
+										if (sharesStr[0].equals(target.getValueAt(row, 0))) {
+											if (Double.parseDouble(sharesStr[2]) > Double
+													.parseDouble(amountField.getText())) {
+												canSell = true;
+											}
+										}
+									}
 
-					popup.setVisible(true);
-				}
-			});
-		}
+								} catch (IOException e2) {
+									// TODO Auto-generated catch block
+									e2.printStackTrace();
+								}
 
-		btnBuySell = new JButton("Buy/Sell");
-		btnBuySell.setBounds(310, 65, 100, 18);
-		tradePanel.add(btnBuySell);
-		btnBuySell.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e1) {
-				for (JButton button : results)
-					tradePanel.remove(button);
-				String searchParam = txtSearch.getText();
-				int xPos = 0, yPos = 0;
-				// Iterate through String array
-				for (int i = 0; i < names.length; i++) {
-					if (names[i].contains(searchParam)) {
-						results[i].setBounds(xPos, yPos, 200, 23);
-						yPos += 23;
-						tradePanel.add(results[i]);
-						tradePanel.revalidate();
-						tradePanel.repaint();
-					}
+								try (CSVReader priceReader = new CSVReader(
+										new FileReader("tickets/sorted_by_name.csv"))) {
+									String[] priceStr = null;
+									while ((priceStr = priceReader.readNext()) != null) {
+										if (priceStr[0].equals(target.getValueAt(row, 0))) {
+											price = Double.parseDouble(priceStr[1]);
+											price *= Double.parseDouble(amountField.getText());
+											funds += price;
+											fundsPanel.removeAll();
+											fundsPanel.add(logoutButton, BorderLayout.WEST);
+											fundsPanel.add(new JLabel(String.format("Current Funds: $%.2f", funds)),
+													BorderLayout.EAST);
+											fundsPanel.revalidate();
+										}
+									}
+								} catch (FileNotFoundException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								} catch (IOException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
+							}
+
+							else if (comboBox.getSelectedIndex() == 1) { // sorted
+																			// by
+																			// price
+
+								try (CSVReader sharesReader = new CSVReader(new FileReader(String
+										.format("accounts/users/%s/CurrentShares.csv", LoginScreen.loginInfo[0])))) {
+									String[] sharesStr;
+									while ((sharesStr = sharesReader.readNext()) != null) {
+										if (sharesStr[0].equals(target.getValueAt(row, 0))) {
+											if (Double.parseDouble(sharesStr[2]) > Double
+													.parseDouble(amountField.getText())) {
+												canSell = true;
+											}
+										}
+									}
+
+								} catch (IOException e2) {
+									// TODO Auto-generated catch block
+									e2.printStackTrace();
+								}
+
+								try (CSVReader priceReader = new CSVReader(
+										new FileReader("tickets/sorted_by_price.csv"))) {
+									String[] priceStr = null;
+									while ((priceStr = priceReader.readNext()) != null) {
+										if (priceStr[0].equals(target.getValueAt(row, 0))) {
+											price = Double.parseDouble(priceStr[1]);
+											price *= Double.parseDouble(amountField.getText());
+											funds += price;
+											fundsPanel.removeAll();
+											fundsPanel.add(logoutButton, BorderLayout.WEST);
+											fundsPanel.add(new JLabel(String.format("Current Funds: $%.2f", funds)),
+													BorderLayout.EAST);
+											fundsPanel.revalidate();
+										}
+									}
+								} catch (FileNotFoundException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								} catch (IOException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
+
+							}
+
+							else if (comboBox.getSelectedIndex() == 2) { // sorted
+																			// by
+																			// volume
+
+								try (CSVReader sharesReader = new CSVReader(new FileReader(String
+										.format("accounts/users/%s/CurrentShares.csv", LoginScreen.loginInfo[0])))) {
+									String[] sharesStr;
+									while ((sharesStr = sharesReader.readNext()) != null) {
+										if (sharesStr[0].equals(target.getValueAt(row, 0))) {
+											if (Double.parseDouble(sharesStr[2]) > Double
+													.parseDouble(amountField.getText())) {
+												canSell = true;
+											}
+										}
+									}
+
+								} catch (IOException e2) {
+									// TODO Auto-generated catch block
+									e2.printStackTrace();
+								}
+
+								try (CSVReader priceReader = new CSVReader(
+										new FileReader("tickets/sorted_by_volume.csv"))) {
+									String[] priceStr = null;
+									while ((priceStr = priceReader.readNext()) != null) {
+										if (priceStr[0].equals(target.getValueAt(row, 0))) {
+											price = Double.parseDouble(priceStr[1]);
+											price *= Double.parseDouble(amountField.getText());
+											funds += price;
+											fundsPanel.removeAll();
+											fundsPanel.add(logoutButton, BorderLayout.WEST);
+											fundsPanel.add(new JLabel(String.format("Current Funds: $%.2f", funds)),
+													BorderLayout.EAST);
+											fundsPanel.revalidate();
+										}
+									}
+								} catch (FileNotFoundException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								} catch (IOException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
+
+							}
+
+							JOptionPane.showMessageDialog(null, "You sold " + amountField.getText() + " shares.");
+
+							popup.dispose();
+						}
+
+					});
+					popup.setVisible(true); // end popup
 				}
 			}
 		});
-		comboBox.setModel(new DefaultComboBoxModel(new String[] { "Select Filter", "Price", "Volume", "Name" }));
-		comboBox.setBounds(294, 11, 129, 20);
-		tradePanel.add(comboBox);
-
-		JList list = new JList();
-		list.setBounds(174, 191, -115, -85);
-		tradePanel.add(list);
 
 		final String[] ticketString = { "General Concern", "Payment Issue", "Account" };
 
@@ -354,7 +763,7 @@ public class MainScreen {
 		panel_2.add(lblNewLabel);
 
 		final JComboBox ticketType = new JComboBox(ticketString);
-		ticketType.setBounds(281, 42, 118, 20);
+		ticketType.setBounds(281, 42, 150, 20);
 		panel_2.add(ticketType);
 
 		JButton btnSubmit = new JButton("Submit");
@@ -365,10 +774,15 @@ public class MainScreen {
 				try (FileWriter ticketWriter = new FileWriter(LoginScreen.ticketsFile, true)) {
 					final String LINEBREAK = System.lineSeparator();
 
-					ticketWriter.write(ticketString[ticketType.getSelectedIndex()] + LINEBREAK);
-					ticketWriter.write(titleField.getText() + LINEBREAK);
-					ticketWriter.write(descField.getText() + LINEBREAK);
+					String ticketSubmission = String.format("%s, %s, %s", ticketType.getSelectedIndex(),
+							titleField.getText(), descField.getText());
+					ticketWriter.write(ticketSubmission);
 					ticketWriter.write(LINEBREAK);
+
+					JOptionPane.showMessageDialog(null, "Ticket submitted");
+					titleField.setText("");
+					descField.setText("");
+
 				} catch (IOException e1) {
 					System.err.println("Failed to write to tickets file");
 				}
