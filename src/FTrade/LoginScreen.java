@@ -2,29 +2,15 @@ package FTrade;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
-
-import com.opencsv.CSVReader;
-
 import java.awt.Font;
 import java.awt.HeadlessException;
-import java.awt.Window;
-
-import javax.swing.JTextField;
-import javax.swing.JButton;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Properties;
-import java.util.Scanner;
-import java.awt.event.ActionEvent;
-import javax.swing.JPasswordField;
+
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -32,6 +18,17 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+
+import com.opencsv.CSVReader;
+
+import accounts.AccountObject;
 
 public class LoginScreen {
 
@@ -61,13 +58,16 @@ public class LoginScreen {
 		});
 	}
 
+	/**
+	 * Constructor
+	 */
 	public LoginScreen() {
 		initialize();
 		frame.setVisible(true);
 	}
 
 	/**
-	 * Initialize the contents of the frame.
+	 * 
 	 */
 	private void initialize() {
 		/* Create data storage files */
@@ -82,7 +82,18 @@ public class LoginScreen {
 		} catch (IOException ioe) {
 			System.err.println("File initialization failed");
 		}
+		frame();
+		loginUser();
+		createUser();
+		forgetPassword();
+		setBackGround();
 
+	}
+
+	/**
+	 * Initialize the contents of the frame.
+	 */
+	public void frame() {
 		frame = new JFrame("FTrade");
 		frame.setResizable(false);
 		frame.setBounds(100, 100, 450, 300);
@@ -111,69 +122,26 @@ public class LoginScreen {
 		lblPassword.setBounds(48, 129, 113, 26);
 		frame.getContentPane().add(lblPassword);
 
-		JButton btnLogin = new JButton("Login");
-		btnLogin.setBounds(199, 172, 78, 26);
-		frame.getContentPane().add(btnLogin);
-		btnLogin.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				loginStatus = false;
-				/* Check login */
-				String fieldPassword = new String(passwordField.getPassword()).trim();
-				try {
-					loginCheck = new CSVReader(new FileReader("accounts/accounts.csv"));
-				} catch (FileNotFoundException fnfe) {
-					System.err.println("Accounts file not found during login check");
-					System.exit(1);
-				}
-				try {
-					while ((loginInfo = loginCheck.readNext()) != null) {
-						String checkUsername = loginInfo[0];
-						
-						if(usernameField.getText().equals("admin")){
-							if(fieldPassword.equals("admin")){
-								new AdminMainScreen();
-								frame.dispose();
-								loginStatus = true;
-								break;
-							}
-						}
-						
-						if (checkUsername.equals(usernameField.getText())) {
-							char[] passwordConvert = loginInfo[1].trim().toCharArray();
-							for (int i = 0; i < passwordConvert.length; i++) {
-								passwordConvert[i] -= i;
-							}
-							loginInfo[1] = new String(passwordConvert).trim();
-							if (fieldPassword.equals(loginInfo[1])) {
-								new MainScreen();
-								frame.dispose();
-								loginStatus = true;
-								break;
-							} 
-							else {
-								usernameField.setText("");
-								passwordField.setText("");
-								JOptionPane.showMessageDialog(null, "Username or password incorrect.",
-										"Incorrect Login", JOptionPane.ERROR_MESSAGE);
-							}
-						} 
-					}
-					if(!loginStatus){
-						usernameField.setText("");
-						passwordField.setText("");
-						JOptionPane.showMessageDialog(null, "Username or password incorrect.",
-								"Incorrect Login", JOptionPane.ERROR_MESSAGE);
-					}
-				} catch (HeadlessException e1) {
-					System.out.println("Headless Exception");
-					e1.printStackTrace();
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}
-		});
+		passwordField = new JPasswordField();
+		passwordField.setBounds(171, 131, 131, 30);
+		frame.getContentPane().add(passwordField);
 
+	}
+
+	/**
+	 * Sets background for frame
+	 */
+	public void setBackGround() {
+		JLabel label = new JLabel("");
+		label.setIcon(new ImageIcon(getClass().getResource("/image/bkgd.jpg")));
+		label.setBounds(0, 0, 450, 278);
+		frame.getContentPane().add(label);
+	}
+
+	/**
+	 * Opens another class to complete user registration
+	 */
+	public void createUser() {
 		JButton btnCreatePassword = new JButton("Create account");
 		btnCreatePassword.setBounds(61, 213, 170, 26);
 		frame.getContentPane().add(btnCreatePassword);
@@ -183,119 +151,123 @@ public class LoginScreen {
 				frame.dispose();
 			}
 		});
+	}
 
+	/**
+	 * Handles User login
+	 */
+	public void loginUser() {
+		JButton btnLogin = new JButton("Login");
+		btnLogin.setBounds(199, 172, 78, 26);
+		frame.getContentPane().add(btnLogin);
+		btnLogin.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String userName = usernameField.getText();
+				char[] passwordArray = passwordField.getPassword();
+				String password = String.valueOf(passwordArray);
+				AccountObject User = new AccountObject();
+				try {
+					if (User.loginUser(userName, password)) {
+						new MainScreen();
+						frame.dispose();
+					} else {
+						// ClearFields, and notified user on incorrect input.
+						usernameField.setText("");
+						passwordField.setText("");
+						JOptionPane.showMessageDialog(null, "Username or password incorrect.", "Incorrect Login",
+								JOptionPane.ERROR_MESSAGE);
+					}
+				} catch (SQLException e1) {
+					System.out.println("CAUGHT SQLException");
+					e1.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Will send instructions via e-email to the registered user.
+	 */
+	public void forgetPassword() {
 		// Forgot Password
 		JButton btnForgotPassword = new JButton("Forgot Password?");
 		btnForgotPassword.setBounds(244, 213, 170, 26);
 		frame.getContentPane().add(btnForgotPassword);
 		btnForgotPassword.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				while (true) {
-					String input = JOptionPane.showInputDialog(null, "Please enter your Email");
-					/* Close if cancel is pressed */
-					if (input == null) {
-						break;
+
+				// Declare Object
+				AccountObject User = new AccountObject();
+				String password = null;
+				String input = JOptionPane.showInputDialog(null, "Please enter your Email");
+				/* Close if cancel is pressed */
+
+				if (input == null) {
+					JOptionPane.showMessageDialog(null, "User is required to input e-mail");
+				} else
+					try {
+						if (User.getPassword(input) != null) {
+							password = User.getPassword(input);
+							JFrame workingDialog = new JFrame("Please Wait");
+							workingDialog.setSize(200, 100);
+							JLabel workingLabel = new JLabel("Working...");
+							workingDialog.add(workingLabel, BorderLayout.CENTER);
+							workingDialog.setVisible(true);
+
+							/*
+							 * input is user Email, check Email in the file
+							 */
+							String to = User.getEmail(input);
+							String host = "smtp.gmail.com";
+							String from = "ftradeas@gmail.com";
+							String pass = "ftradeaccountsupport";
+
+							Properties props = System.getProperties();
+							props.put("mail.smtp.ssl.enable", "true"); // added
+							// this
+							// line
+							props.put("mail.smtp.host", host);
+							props.put("mail.smtp.user", from);
+							props.put("mail.smtp.password", pass);
+							props.put("mail.smtp.port", "465");
+							props.put("mail.smtp.auth", "true");
+
+							Session session = Session.getDefaultInstance(props, null);
+							try {
+								MimeMessage message = new MimeMessage(session);
+
+								message.setFrom(new InternetAddress(from));
+								message.setRecipient(Message.RecipientType.TO, new InternetAddress(to));
+								message.setSubject("Forgot Password - FTrade");
+
+								message.setText("Your password is: " + password);
+
+								Transport transport = session.getTransport("smtp");
+								transport.connect(host, from, pass);
+								transport.sendMessage(message, message.getAllRecipients());
+								transport.close();
+
+								workingDialog.dispose();
+								JOptionPane.showMessageDialog(null, "Password has been sent to your Email");
+
+							} catch (MessagingException me) {
+								System.out.println("Failed to send message");
+								System.out.println(me.getLocalizedMessage());
+								me.printStackTrace();
+							}
+						} else {
+							JOptionPane.showMessageDialog(null, "Invalid Email");
+						}
+
+					} catch (HeadlessException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
 					}
-					if (input.contains("@")) {
-						JFrame workingDialog = new JFrame("Please Wait");
-						workingDialog.setSize(200, 100);
-						JLabel workingLabel = new JLabel("Working...");
-						workingDialog.add(workingLabel, BorderLayout.CENTER);
-						workingDialog.setVisible(true);
-						/*
-						 * input is user Email, check Email in the file
-						 */
-						boolean wasSent = false;
-						String to = null;
-						String userPassword = null;
-						String host = "smtp.gmail.com";
-						String from = "ftradeas@gmail.com";
-						String pass = "ftradeaccountsupport";
 
-						Properties props = System.getProperties();
-						props.put("mail.smtp.ssl.enable", "true"); // added this
-																	// line
-						props.put("mail.smtp.host", host);
-						props.put("mail.smtp.user", from);
-						props.put("mail.smtp.password", pass);
-						props.put("mail.smtp.port", "465");
-						props.put("mail.smtp.auth", "true");
-
-						Session session = Session.getDefaultInstance(props, null);
-
-						try {
-							loginCheck = new CSVReader(new FileReader("accounts/accounts.csv"));
-						} catch (FileNotFoundException e1) {
-							System.out.println("Error opening accounts file");
-							e1.printStackTrace();
-						}
-
-						String[] forgotPassInfo;
-						try {
-							while ((forgotPassInfo = loginCheck.readNext()) != null) {
-								if ((to = forgotPassInfo[2]) != null) {
-									if(to.trim().equals(input)){
-										try {
-											MimeMessage message = new MimeMessage(session);
-	
-											message.setFrom(new InternetAddress(from));
-											message.setRecipient(Message.RecipientType.TO, new InternetAddress(to));
-											message.setSubject("Forgot Password - FTrade");
-	
-											char[] userPassConvert = forgotPassInfo[1].trim().toCharArray();
-											userPassword = "";
-											for (int i = 0; i < userPassConvert.length; i++) {
-												userPassConvert[i] -= i;
-												userPassword += userPassConvert[i];
-											}
-											message.setText("Your password is: " + userPassword);
-	
-											Transport transport = session.getTransport("smtp");
-											transport.connect(host, from, pass);
-											transport.sendMessage(message, message.getAllRecipients());
-											transport.close();
-	
-											wasSent = true;
-	
-										} catch (MessagingException me) {
-											System.out.println("Failed to send message");
-											System.out.println(me.getLocalizedMessage());
-											me.printStackTrace();
-										}
-									}
-									else{
-										continue;
-									}
-								}
-							} //end while
-							
-						} catch (IOException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						}
-						
-						if (wasSent) {
-							workingDialog.dispose();
-							JOptionPane.showMessageDialog(null, "Password has been sent to your Email");
-							break;
-						} else { // No message sent
-							JOptionPane.showMessageDialog(null, "Email not registered");
-							break;
-						}
-					}
-					JOptionPane.showMessageDialog(null, "Invalid Email");
-
-				} // end loop
 			}
 		});
-
-		passwordField = new JPasswordField();
-		passwordField.setBounds(171, 131, 131, 30);
-		frame.getContentPane().add(passwordField);
-
-		JLabel label = new JLabel("");
-		label.setIcon(new ImageIcon(getClass().getResource("/image/bkgd.jpg")));
-		label.setBounds(0, 0, 450, 278);
-		frame.getContentPane().add(label);
 	}
 }

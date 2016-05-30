@@ -132,41 +132,41 @@ public class MainScreen {
 		newsPanel.setToolTipText("");
 		tabbedPane.addTab("News", null, newsPanel, null);
 		newsPanel.setLayout(null);
-
-		try {
-			fundsReader = new CSVReader(
-					new FileReader("accounts/users/" + LoginScreen.loginInfo[0] + "/CurrentFunds.dat"));
-
-			fundsPanel = new JPanel();
-			fundsPanel.setLayout(new BorderLayout());
-			funds = Double.parseDouble(fundsReader.readNext()[0]);
-
-			logoutButton = new JButton("Logout");
-			logoutButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					new LoginScreen();
-					frame.dispose();
-				}
-			});
-
-			fundsPanel.add(logoutButton, BorderLayout.WEST);
-			fundsPanel.add(new JLabel(String.format("Current Funds: $%.2f", funds)), BorderLayout.EAST);
-
-			frame.getContentPane().add(fundsPanel, BorderLayout.SOUTH);
-		} catch (FileNotFoundException e3) {
-			System.err.println("Current funds reader failed to open");
-			e3.printStackTrace();
-		} catch (IOException e1) {
-			System.err.println("Failed to read current funds");
-			e1.printStackTrace();
-		} finally {
-			try {
-				fundsReader.close();
-			} catch (IOException e1) {
-				System.err.println("Failed to close funds reader");
-				e1.printStackTrace();
-			}
-		}
+//
+//		try {
+//			fundsReader = new CSVReader(
+//					new FileReader("accounts/users/" + LoginScreen.loginInfo[0] + "/CurrentFunds.dat"));
+//
+//			fundsPanel = new JPanel();
+//			fundsPanel.setLayout(new BorderLayout());
+//			funds = Double.parseDouble(fundsReader.readNext()[0]);
+//
+//			logoutButton = new JButton("Logout");
+//			logoutButton.addActionListener(new ActionListener() {
+//				public void actionPerformed(ActionEvent e) {
+//					new LoginScreen();
+//					frame.dispose();
+//				}
+//			});
+//
+//			fundsPanel.add(logoutButton, BorderLayout.WEST);
+//			fundsPanel.add(new JLabel(String.format("Current Funds: $%.2f", funds)), BorderLayout.EAST);
+//
+//			frame.getContentPane().add(fundsPanel, BorderLayout.SOUTH);
+//		} catch (FileNotFoundException e3) {
+//			System.err.println("Current funds reader failed to open");
+//			e3.printStackTrace();
+//		} catch (IOException e1) {
+//			System.err.println("Failed to read current funds");
+//			e1.printStackTrace();
+//		} finally {
+//			try {
+//				fundsReader.close();
+//			} catch (IOException e1) {
+//				System.err.println("Failed to close funds reader");
+//				e1.printStackTrace();
+//			}
+//		}
 
 		JLabel lblNews = new JLabel("News");
 		lblNews.setFont(new Font("Thames", Font.BOLD | Font.ITALIC, 25));
